@@ -34,6 +34,7 @@ export async function sendSlackMessage(
       target: config.summaryTarget,
       textLength: text.length,
     });
+    logger.info('[DRY RUN] Message content:', text);
     return;
   }
 
