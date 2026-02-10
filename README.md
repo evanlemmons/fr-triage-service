@@ -19,20 +19,31 @@ All triage happens in Notion. No GitHub issues are created.
 
 1. Copy `src/products/_template.yml` to `src/products/{product-name}.yml`
 2. Fill in the product page ID, product info page ID, and database IDs
-3. Write a product-specific alignment prompt (model after `home.yml`)
-4. Push and trigger a dry-run to validate
+3. Write a product-specific alignment prompt (model after `home.yml` or `people.yml`)
+4. Commit and push to GitHub
+5. Test via GitHub Actions with `--write-audit` flag
+6. Review audit pages in Notion to validate configuration
 
 ## Usage
+
+**⚠️ NEVER RUN THESE COMMANDS LOCALLY IN PRODUCTION**
+
+These commands require production API credentials and will write to production databases. **ALWAYS trigger via GitHub Actions** for testing and production runs.
+
+**Command reference** (for GitHub Actions workflow configuration only):
 
 ```bash
 # Dry run — console output only, no Notion writes at all
 npx tsx src/index.ts --product home --dry-run
 
-# Dry run with audit — creates audit page in Notion but doesn't touch FR properties
-npx tsx src/index.ts --product home --dry-run --write-audit
+# Write audit — creates audit page in Notion but doesn't touch FR properties (RECOMMENDED FOR TESTING)
+npx tsx src/index.ts --product home --write-audit
 
-# Triage Home product (live)
+# Triage Home product (live) — updates FR relations
 npx tsx src/index.ts --product home
+
+# Triage People product (live)
+npx tsx src/index.ts --product people
 
 # Triage all configured products
 npx tsx src/index.ts --product all
@@ -40,22 +51,28 @@ npx tsx src/index.ts --product all
 # List available products
 npx tsx src/index.ts --list-products
 
-# Backtest: re-process last 7 days of FRs regardless of status (dry-run enforced)
-npx tsx src/index.ts --product home --backtest
-
-# Backtest with custom lookback window
-npx tsx src/index.ts --product home --backtest --backtest-days 14
+# Backtest: re-process last 7 days of FRs regardless of status
+npx tsx src/index.ts --product home --backtest --backtest-days 7
 ```
 
-### Dry Run Modes
+**To test changes:**
+1. Make code/config changes locally
+2. Commit and push to GitHub
+3. Go to https://github.com/evanlemmons/fr-triage-service/actions
+4. Trigger "Feature Request Triage" workflow manually
+5. Select product, enable `--write-audit` flag
+6. Monitor execution and review audit pages in Notion
 
-There are three levels of dry run:
+### Test Modes (via GitHub Actions)
+
+**All testing must be done via GitHub Actions.** Do not run locally with production credentials.
 
 | Mode | Audit page created? | FR relations updated? | Use case |
 |------|--------------------|-----------------------|----------|
-| `--dry-run` | No | No | Quick local testing, console output only |
-| `--dry-run --write-audit` | Yes | No | Review full audit in Notion without touching FRs |
+| `--dry-run` | No | No | Validation only, logs to console |
+| `--write-audit` | Yes | No | **Recommended for testing** - Review audit in Notion without touching FRs |
 | `--backtest` | Yes | No | Compare against n8n using already-processed FRs |
+| (no flags) | Yes | Yes | **Production mode** - Full triage with FR updates |
 
 ### Backtest Mode
 
