@@ -16,6 +16,7 @@ on:
         type: choice
         options:
           - home
+          - people
           - all
       dry_run:
         description: 'Dry run (log actions without writing to Notion)'
