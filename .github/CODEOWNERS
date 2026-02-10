@@ -1,0 +1,22 @@
+# Code Owners - Auto-request reviews for specific files
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: Evan reviews everything by default
+* @evanlemmons
+
+# GitHub Actions workflows require Evan's review (critical infrastructure)
+.github/workflows/* @evanlemmons
+
+# Core service code requires Evan's review
+src/**/*.ts @evanlemmons
+tests/**/*.ts @evanlemmons
+
+# Product configs: Any product manager can approve their own product's YAML
+# (Still requires Evan as default owner, but PMs can self-review if needed)
+src/products/home.yml @evanlemmons
+src/products/people.yml @evanlemmons
+# Add future products here with their PM's GitHub username:
+# src/products/groups.yml @evanlemmons @pmname
+
+# Documentation: Anyone can contribute
+*.md

@@ -1,0 +1,74 @@
+name: Validate PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Validate product configs
+        run: |
+          # Check that product YAML files are valid
+          echo "Validating product configurations..."
+          npx tsx -e "
+          import { loadProductConfig } from './src/config/loader.js';
+          import { readdirSync } from 'fs';
+          import { join } from 'path';
+
+          const productsDir = './src/products';
+          const files = readdirSync(productsDir).filter(f => f.endsWith('.yml') && !f.startsWith('_'));
+
+          console.log('Found product configs:', files);
+
+          for (const file of files) {
+            const productName = file.replace('.yml', '');
+            try {
+              console.log(\`Validating \${productName}...\`);
+              await loadProductConfig(productName);
+              console.log(\`✓ \${productName} config is valid\`);
+            } catch (err) {
+              console.error(\`✗ \${productName} config is invalid:\`, err);
+              process.exit(1);
+            }
+          }
+
+          console.log('All product configs are valid!');
+          "
+
+      - name: Comment on PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ All validation checks passed! Tests, type checking, and product configs are valid.'
+            })
