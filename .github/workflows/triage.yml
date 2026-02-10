@@ -2,7 +2,9 @@ name: Feature Request Triage
 
 on:
   schedule:
-    - cron: '0 11 * * 1-5'  # 6 AM ET (UTC-5), weekdays
+    # Runs at 10:00 UTC (6 AM EDT / 5 AM EST), weekdays
+    # Note: Cron runs in UTC and doesn't adjust for DST automatically
+    - cron: '0 10 * * 1-5'
   workflow_dispatch:
     inputs:
       product:

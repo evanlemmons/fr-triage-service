@@ -39,7 +39,7 @@ llm:
 
         Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference data from another Planning Center product that intends to be visualized in Home.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Home is a read-only aggregation and coordination surface. Tasks and task lists are also contained in the Home UI and codebase.
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Home encompasses two capabilities: (1) read-only dashboard aggregation and data visualization, and (2) full-featured task management with write operations. Tasks and task lists are contained in the Home UI and codebase.
 
         Decision heuristic (follow in order):
         1. Ask: Where would this change be implemented?
@@ -205,4 +205,8 @@ notifications:
       id: "UBMGWSSS1"
 
 schedule:
-  cron: "0 11 * * 1-5"
+  # Runs at 10:00 UTC (6 AM EDT / 5 AM EST)
+  # Note: GitHub Actions cron runs in UTC and doesn't adjust for DST automatically.
+  # During Eastern Daylight Time (Mar-Nov): runs at 6 AM ET
+  # During Eastern Standard Time (Nov-Mar): runs at 5 AM ET
+  cron: "0 10 * * 1-5"
