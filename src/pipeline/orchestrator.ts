@@ -1,6 +1,7 @@
 import { NotionClientWrapper } from '../notion/client.js';
 import { LLMClient } from '../llm/client.js';
 import { sendNoFrsMessage } from '../notifications/slack.js';
+import { buildDividerBlock } from '../audit/writer.js';
 import { runPrep } from './prep.js';
 import { processFR } from './process-fr.js';
 import { runFinalize } from './finalize.js';
@@ -94,6 +95,14 @@ export async function runTriage(
         ideaMatches: [],
         errors: [String(err)],
       });
+    }
+
+    // Add divider after each FR (except the last one)
+    if (i < prepResult.featureRequests.length - 1) {
+      await notionClient.appendBlockChildren(
+        prepResult.auditPageId,
+        buildDividerBlock(),
+      );
     }
   }
 

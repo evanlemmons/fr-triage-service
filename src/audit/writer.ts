@@ -25,8 +25,13 @@ export function buildFRHeaderBlocks(frIndex: number, frPageId: string): any[] {
 /**
  * Build the product alignment audit section.
  */
-export function buildAlignmentAuditBlocks(result: AlignmentResult): any[] {
-  const verdict = result.verdict.charAt(0).toUpperCase() + result.verdict.slice(1);
+export function buildAlignmentAuditBlocks(result: AlignmentResult, productName: string): any[] {
+  // Format verdict with product-neutral handling
+  let verdict = result.verdict.charAt(0).toUpperCase() + result.verdict.slice(1);
+  if (verdict.toLowerCase().startsWith('not_')) {
+    verdict = `NOT ${productName}`;
+  }
+
   const confidenceStr = `${Math.round(result.confidence * 100)}%`;
   const suggestedProduct = result.suggested_product?.trim() || 'N/A';
 
@@ -271,6 +276,19 @@ export function buildNoIdeaMatchWarning(): any[] {
     icon: '⚠️',
     color: 'orange_background'
   })];
+}
+
+/**
+ * Build a divider block for visual separation.
+ */
+export function buildDividerBlock(): any[] {
+  return [
+    {
+      object: 'block',
+      type: 'divider',
+      divider: {}
+    }
+  ];
 }
 
 /**

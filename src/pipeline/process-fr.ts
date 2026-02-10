@@ -77,7 +77,7 @@ export async function processFR(
     // Write alignment audit
     await notionClient.appendBlockChildren(
       prepResult.auditPageId,
-      buildAlignmentAuditBlocks(alignment),
+      buildAlignmentAuditBlocks(alignment, config.product.name),
     );
 
     // Determine if FR belongs to this product

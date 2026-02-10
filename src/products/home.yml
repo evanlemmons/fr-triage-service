@@ -39,26 +39,39 @@ llm:
 
         Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference data from another Planning Center product that intends to be visualized in Home.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Home encompasses two capabilities: (1) read-only dashboard aggregation and data visualization, and (2) full-featured task management with write operations. Tasks and task lists are contained in the Home UI and codebase.
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Home encompasses three capabilities: (1) read-only dashboard aggregation and data visualization, (2) full-featured task management with write operations, and (3) Planning Center App (PCA) infrastructure and features.
+
+        Planning Center App (PCA) scope clarification:
+        - PCA is a mobile app that serves as a hub for Planning Center, with the Home team responsible for its infrastructure and native features
+        - Home team IS responsible for: PCA login, push notification settings, preferred app settings, dark mode, PCA dashboards, PCA tasks, and structural PCA features
+        - Home team is NOT responsible for: web views accessed through PCA's in-app browser (those belong to the respective product teams)
+        - Key distinction: If the request is about PCA's infrastructure, settings, or native features → home. If it's about web content viewed through PCA's browser → not_home.
 
         Decision heuristic (follow in order):
-        1. Ask: Where would this change be implemented?
-        - Home dashboards, widgets, tasks, or task lists → lean home
+        1. Ask: Is this about PCA infrastructure/settings/native features?
+        - PCA login, push notifications, dark mode, preferred app settings → home
+        - PCA dashboards or tasks → home
+        - Web views of other products in PCA browser → not_home
+
+        2. Ask: Where would this change be implemented?
+        - Home dashboards, widgets, tasks, task lists, or PCA native features → lean home
         - Another product's UI, settings, workflows, or data → lean not_home
 
-        2. Ask: Is the request asking to change behavior or to surface information?
+        3. Ask: Is the request asking to change behavior or to surface information?
         - Changing behavior, rules, approvals, notifications → usually not_home
         - Surfacing or visualizing existing data → usually home
 
-        3. Ask: Could this be solved by a new or improved dashboard, widget, or task feature? Or by implementing brand new project management functionality in Home?
+        4. Ask: Could this be solved by a new or improved dashboard, widget, or task feature? Or by implementing brand new project management functionality in Home?
         - Yes → home
         - No → not_home or uncertain
 
         Hard rules:
         1. If the request asks for a dashboard, widget, widget settings/configuration, data visualization, or dashboard layout/sharing, verdict must be "home" even if another product is referenced.
-        2. If the request is clearly about another product's workflow, UI, settings, notifications, approvals, permissions, or data model, verdict must be "not_home".
-        3. If the request could plausibly be implemented either in Home or another product and does not explicitly mention dashboards, widgets, or task lists, verdict must be "uncertain".
-        4. All feature requests specifically about tasks, "to-dos", the Tasks mobile app, or task lists belong to Home.
+        2. If the request is about PCA infrastructure (login, push notifications, dark mode, app settings) or PCA native features (dashboards, tasks), verdict must be "home".
+        3. If the request is about web views accessed through PCA's in-app browser, verdict must be "not_home" (those belong to the product being viewed).
+        4. If the request is clearly about another product's workflow, UI, settings, notifications, approvals, permissions, or data model, verdict must be "not_home".
+        5. If the request could plausibly be implemented either in Home or another product and does not explicitly mention dashboards, widgets, task lists, or PCA features, verdict must be "uncertain".
+        6. All feature requests specifically about tasks, "to-dos", the Tasks mobile app, or task lists belong to Home.
 
         Output rules:
         - Use only the product context and feature request content provided.
