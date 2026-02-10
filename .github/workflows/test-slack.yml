@@ -1,0 +1,36 @@
+name: Test Slack Integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_id:
+        description: 'Slack user ID to send test message to'
+        required: false
+        default: 'UBMGWSSS1'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test-slack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test Slack connection
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_USER_ID: ${{ github.event.inputs.user_id || 'UBMGWSSS1' }}
+        run: npx tsx test-slack.ts
