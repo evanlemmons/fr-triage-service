@@ -69,7 +69,7 @@ Use `--backtest` to compare the new service against n8n's existing results. It q
 | `LLM_API_KEY` | Yes | Anthropic (or OpenAI) API key |
 | `SLACK_BOT_TOKEN` | Yes | Slack bot OAuth token |
 | `LLM_PROVIDER` | No | `anthropic` (default) or `openai` |
-| `LLM_MODEL` | No | Model ID (default: `claude-sonnet-4-5-20250514`) |
+| `LLM_MODEL` | No | Model ID (default: `claude-sonnet-4-5-20250929`) |
 | `DRY_RUN` | No | `true` to skip FR relation updates |
 | `WRITE_AUDIT` | No | `true` to create audit page in Notion during dry-run |
 | `BACKTEST` | No | `true` to query recent FRs regardless of status (implies dry-run + write-audit) |

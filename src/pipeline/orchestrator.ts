@@ -28,7 +28,7 @@ export async function runTriage(
   }
 
   const llmProvider = (process.env.LLM_PROVIDER ?? 'anthropic') as 'anthropic' | 'openai';
-  const llmModel = process.env.LLM_MODEL ?? product.llm.model ?? 'claude-sonnet-4-5-20250514';
+  const llmModel = process.env.LLM_MODEL ?? product.llm.model ?? 'claude-sonnet-4-5-20250929';
 
   // When writeAudit is enabled, allow Notion writes (the client won't gate them).
   // FR relation updates are gated separately in process-fr.ts via config.dryRun.

@@ -66,7 +66,7 @@ jobs:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'anthropic' }}
-          LLM_MODEL: ${{ vars.LLM_MODEL || 'claude-sonnet-4-5-20250514' }}
+          LLM_MODEL: ${{ vars.LLM_MODEL || 'claude-sonnet-4-5-20250929' }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           VERBOSE: ${{ github.event.inputs.verbose || 'false' }}
