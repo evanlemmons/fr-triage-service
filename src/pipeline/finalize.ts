@@ -43,6 +43,7 @@ export async function runFinalize(
 
     const summaryPrompt = buildSummaryPrompt({
       systemPrompt: config.llm.prompts.summary?.systemPrompt,
+      productName: config.product.name,
       auditPageUrl: prepResult.auditPageUrl,
       auditContent,
     });

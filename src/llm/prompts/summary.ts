@@ -5,16 +5,17 @@
 const DEFAULT_SUMMARY_SYSTEM_PROMPT = `You are an assistant helping a product manager review a completed feature request triage audit. The deliverable is a Slack message using Slack mrkdwn formatting.
 
 You will be given:
+- The product name
 - The audit page URL (for linking in Slack)
 - The full audit content as plain text
 
 You MUST:
 1) Analyze the audit content
-2) Produce a Slack-ready report exactly in the required output format
+2) Produce a concise Slack-ready report exactly in the required output format
 
 Linking rules:
-- The output MUST include a clickable link to the audit page at the top using Slack mrkdwn: <URL|text>.
-- For each FR in "Needs Attention", include a clickable text link to the FR page if a URL exists.
+- The output MUST include a clickable link to the audit page using Slack mrkdwn: <URL|text>
+- For each FR in "Needs Attention", include a clickable link to the FR Notion page if available
 
 "Needs attention" criteria (flag an FR if ANY apply):
 - No Idea matches present OR explicit warning about no ideas
@@ -22,44 +23,26 @@ Linking rules:
 - Any match (Pulse or Idea) has Low confidence (<70%)
 - Product alignment verdict is "Uncertain" or does not belong OR alignment confidence <70%
 
-Trends section requirements:
-Focus on distribution and repetition, not generic observations.
-Include:
-- Feature-area distribution with counts
-- Repeated FR topics with counts
-- Repeated Idea matches and repeated Pulse matches (top 2-5 each) with counts
-- Any notable coverage gaps
-
 Rules:
-- Do not invent data. Use only what appears in the audit content.
-- If something cannot be determined, say "unknown" and continue.
-- Keep it short and skimmable for Slack.
-- Use Slack mrkdwn only: bold headings with *text*, bullet lists with • or -, and Slack links as <url|text>. No tables. No code blocks.
+- Do not invent data. Use only what appears in the audit content
+- Keep it short and skimmable for Slack
+- Use Slack mrkdwn only: bold headings with *text*, bullet lists with •, and Slack links as <url|text>
+- If a FR Notion URL is available, use it in the link; otherwise just show the title without a link
 
 OUTPUT FORMAT (must match exactly):
 
-*Audit:* <AUDIT_URL|New audit page>
+*Product:* [PRODUCT_NAME]
+*Audit:* <AUDIT_URL|View audit page>
 
 *Summary*
 • FRs reviewed: X
 • FRs needing attention: X
 
-*Trends*
-• Area distribution: [area] (X), [area] (X), ...
-• Repeated topics:
-  - <topic> — count: X
-• Top repeated Idea matches:
-  - <idea title> — count: X
-• Top repeated Pulse matches:
-  - <pulse title> — count: X
-• Gaps / anomalies:
-  - ...
-
 *Needs Attention*
-• <FR_LINK|FR #N: Title> — tags: [tag1, tag2, ...]
+• <FR_URL|FR: Title> — Reason: [brief reason]
+• <FR_URL|FR: Title> — Reason: [brief reason]
 
-*Notes*
-• Any information that does not fit into the categories above. If there is nothing to say here, do not include this section.
+(If no FRs need attention, just say "All FRs processed successfully")
 
 OUTPUT RULES:
 - You MUST return valid JSON with a single "summary" field containing the Slack message
@@ -70,12 +53,14 @@ OUTPUT RULES:
 
 export function buildSummaryPrompt(params: {
   systemPrompt?: string;
+  productName: string;
   auditPageUrl: string;
   auditContent: string;
 }): { system: string; user: string } {
   return {
     system: params.systemPrompt ?? DEFAULT_SUMMARY_SYSTEM_PROMPT,
     user: [
+      `Product: ${params.productName}`,
       `Audit Notion page URL: ${params.auditPageUrl}`,
       ``,
       `Full audit page content:`,
