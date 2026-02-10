@@ -6,7 +6,10 @@ product:
   name: "YOUR_PRODUCT_NAME"        # e.g., "Groups"
   selectValue: "YOUR_PRODUCT_NAME"  # Must match the Product select value in the FR database
   productPageId: "YOUR_PRODUCT_PAGE_ID"  # Notion page ID for this product (used in relation filters)
-  enabled: true                     # Set to false to temporarily disable this product
+  # enabled: Controls whether this product can be loaded by the service (defaults to true)
+  # Set to false to temporarily disable while refining prompts or testing configurations
+  # The service will refuse to load disabled products, even if explicitly requested
+  enabled: true
 
 productInfo:
   pageId: "YOUR_PRODUCT_INFO_PAGE_ID"  # Notion page with product description and FR handling guidelines

@@ -9,7 +9,10 @@ product:
   name: "People"
   selectValue: "People"
   productPageId: "a02659c9-21bd-42d2-b557-e02457f09eb1"
-  enabled: false  # DISABLED: Waiting for PM approval
+  # enabled: Controls whether this product config can be loaded by the service
+  # Currently DISABLED while product manager refines prompts and tests configurations.
+  # Change to true when ready for production use.
+  enabled: false
 
 productInfo:
   pageId: "a02659c9-21bd-42d2-b557-e02457f09eb1"  # Same as product page for now
