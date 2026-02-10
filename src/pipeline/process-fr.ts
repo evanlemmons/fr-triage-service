@@ -229,7 +229,7 @@ async function matchPulses(
         fr.existingPulseRelationIds,
         validMatches.map((m) => m.id),
       );
-      await updateFRPulseRelation(notionClient, fr.id, mergedIds);
+      await updateFRPulseRelation(notionClient, fr.id, mergedIds, skipFRUpdates);
       logger.info(`  Updated FR pulse relations: ${validMatches.length} matches`);
     } else {
       logger.info(`  Found ${validMatches.length} pulse matches (FR update skipped — dry run)`);
@@ -398,7 +398,7 @@ async function matchIdeas(
         fr.existingIdeaRelationIds,
         validMatches.map((m) => m.id),
       );
-      await updateFRIdeaRelation(notionClient, fr.id, mergedIds);
+      await updateFRIdeaRelation(notionClient, fr.id, mergedIds, skipFRUpdates);
       logger.info(`  Updated FR idea relations: ${validMatches.length} matches`);
     } else {
       logger.info(`  Found ${validMatches.length} idea matches (FR update skipped — dry run)`);

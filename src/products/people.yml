@@ -1,3 +1,11 @@
+# ============================================================================
+# TEMPORARILY DISABLED - DO NOT ENABLE WITHOUT APPROVAL
+# ============================================================================
+# The People product manager is currently refining LLM prompts and testing
+# configurations. This product config will remain disabled until approved for
+# production use. See index.ts for enforcement logic.
+# ============================================================================
+
 product:
   name: "People"
   selectValue: "People"

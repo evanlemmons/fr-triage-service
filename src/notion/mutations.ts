@@ -59,12 +59,21 @@ export async function createAuditPage(
 
 /**
  * Update the FR's Product Pulse relation with merged IDs.
+ *
+ * CRITICAL: This function has built-in dry-run protection as a safety layer.
+ * Even if called by mistake during dry-run, it will not modify FR properties.
  */
 export async function updateFRPulseRelation(
   client: NotionClientWrapper,
   frPageId: string,
   mergedPulseIds: string[],
+  dryRun: boolean,
 ): Promise<void> {
+  // SAFETY: Never modify FR properties during dry-run, regardless of caller checks
+  if (dryRun) {
+    return;
+  }
+
   await client.updatePage({
     page_id: frPageId,
     properties: {
@@ -77,12 +86,21 @@ export async function updateFRPulseRelation(
 
 /**
  * Update the FR's Ideas Database relation with merged IDs.
+ *
+ * CRITICAL: This function has built-in dry-run protection as a safety layer.
+ * Even if called by mistake during dry-run, it will not modify FR properties.
  */
 export async function updateFRIdeaRelation(
   client: NotionClientWrapper,
   frPageId: string,
   mergedIdeaIds: string[],
+  dryRun: boolean,
 ): Promise<void> {
+  // SAFETY: Never modify FR properties during dry-run, regardless of caller checks
+  if (dryRun) {
+    return;
+  }
+
   await client.updatePage({
     page_id: frPageId,
     properties: {

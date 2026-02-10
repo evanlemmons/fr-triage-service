@@ -59,7 +59,13 @@ async function main() {
     ? await listAvailableProducts()
     : [productName];
 
+  // CRITICAL: Temporarily disabled products (waiting for PM approval)
+  const disabledProducts = ['people'];
   for (const name of productNames) {
+    if (disabledProducts.includes(name)) {
+      logger.error(`Product "${name}" is temporarily disabled. The product manager is refining prompts and configurations.`);
+      throw new Error(`Product "${name}" is temporarily disabled. Please contact the product manager before enabling.`);
+    }
     logger.info(`\n${'='.repeat(60)}`);
     logger.info(`Starting triage for product: ${name}`);
     logger.info(`${'='.repeat(60)}`);
