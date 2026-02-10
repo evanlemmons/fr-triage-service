@@ -246,12 +246,12 @@ notifications:
     enabled: true
     noFrsChannelId: "UBMGWSSS1"
     summaryTarget:
-      type: "user"
-      id: "UBMGWSSS1"
+      type: "channel"
+      id: "C0A9VFKUY2C"  # #fr-triage
     # Optional: dedicated error notification target (defaults to summaryTarget)
     errorTarget:
-      type: "user"
-      id: "UBMGWSSS1"
+      type: "channel"
+      id: "C0A9VFKUY2C"  # #fr-triage
 
 schedule:
   # Runs at 11:00 UTC (6 AM EST / 7 AM EDT), Mondays only
