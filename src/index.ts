@@ -10,6 +10,7 @@ async function main() {
     options: {
       product: { type: 'string', short: 'p', default: 'home' },
       'dry-run': { type: 'boolean', default: false },
+      'write-audit': { type: 'boolean', default: false },
       backtest: { type: 'boolean', default: false },
       'backtest-days': { type: 'string', default: '7' },
       verbose: { type: 'boolean', short: 'v', default: false },
@@ -21,12 +22,18 @@ async function main() {
   const verbose = values.verbose || process.env.VERBOSE === 'true';
   const backtest = values.backtest || process.env.BACKTEST === 'true';
   const backtestDays = parseInt(values['backtest-days'] ?? '7', 10);
-  // Backtest always implies dry-run — it should never write to Notion
+  // Backtest always implies dry-run — it should never modify FR properties
   const dryRun = backtest || values['dry-run'] || process.env.DRY_RUN === 'true';
+  // Backtest implies write-audit so you can review in Notion
+  const writeAudit = backtest || values['write-audit'] || process.env.WRITE_AUDIT === 'true';
   const logger = createLogger(verbose);
 
   if (backtest) {
-    logger.info(`BACKTEST MODE: Re-processing last ${backtestDays} days of FRs (dry-run enforced)`);
+    logger.info(`BACKTEST MODE: Re-processing last ${backtestDays} days of FRs (audit page will be created, FR properties untouched)`);
+  } else if (dryRun && writeAudit) {
+    logger.info('DRY RUN with audit: audit page will be created in Notion, FR properties untouched');
+  } else if (dryRun) {
+    logger.info('DRY RUN: no Notion writes at all (use --write-audit to create audit page)');
   }
 
   // List available products and exit
@@ -59,6 +66,7 @@ async function main() {
           product: config,
           frDatabaseId: FR_DATABASE_ID,
           dryRun,
+          writeAudit,
           verbose,
           backtest,
           backtestDays,

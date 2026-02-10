@@ -34,6 +34,7 @@ export async function processFR(
   notionClient: NotionClientWrapper,
   llmClient: LLMClient,
   logger: Logger,
+  skipFRUpdates: boolean = false,
 ): Promise<FRProcessingResult> {
   const errors: string[] = [];
   const result: FRProcessingResult = {
@@ -103,6 +104,7 @@ export async function processFR(
         notionClient,
         llmClient,
         logger,
+        skipFRUpdates,
       );
     }
 
@@ -116,6 +118,7 @@ export async function processFR(
         notionClient,
         llmClient,
         logger,
+        skipFRUpdates,
       );
     }
   } catch (err) {
@@ -137,6 +140,7 @@ async function matchPulses(
   notionClient: NotionClientWrapper,
   llmClient: LLMClient,
   logger: Logger,
+  skipFRUpdates: boolean,
 ): Promise<ValidatedMatch[]> {
   // Write pulse header to audit
   await notionClient.appendBlockChildren(
@@ -195,13 +199,17 @@ async function matchPulses(
       );
     }
 
-    // Merge with existing relation IDs and update
-    const mergedIds = mergeRelationIds(
-      fr.existingPulseRelationIds,
-      validMatches.map((m) => m.id),
-    );
-    await updateFRPulseRelation(notionClient, fr.id, mergedIds);
-    logger.info(`  Updated FR pulse relations: ${validMatches.length} matches`);
+    // Merge with existing relation IDs and update FR
+    if (!skipFRUpdates) {
+      const mergedIds = mergeRelationIds(
+        fr.existingPulseRelationIds,
+        validMatches.map((m) => m.id),
+      );
+      await updateFRPulseRelation(notionClient, fr.id, mergedIds);
+      logger.info(`  Updated FR pulse relations: ${validMatches.length} matches`);
+    } else {
+      logger.info(`  Found ${validMatches.length} pulse matches (FR update skipped — dry run)`);
+    }
   } else {
     // No matches - write warning
     await notionClient.appendBlockChildren(
@@ -224,6 +232,7 @@ async function matchIdeas(
   notionClient: NotionClientWrapper,
   llmClient: LLMClient,
   logger: Logger,
+  skipFRUpdates: boolean,
 ): Promise<ValidatedMatch[]> {
   // Write idea header to audit
   await notionClient.appendBlockChildren(
@@ -348,13 +357,17 @@ async function matchIdeas(
       );
     }
 
-    // Merge with existing relation IDs and update
-    const mergedIds = mergeRelationIds(
-      fr.existingIdeaRelationIds,
-      validMatches.map((m) => m.id),
-    );
-    await updateFRIdeaRelation(notionClient, fr.id, mergedIds);
-    logger.info(`  Updated FR idea relations: ${validMatches.length} matches`);
+    // Merge with existing relation IDs and update FR
+    if (!skipFRUpdates) {
+      const mergedIds = mergeRelationIds(
+        fr.existingIdeaRelationIds,
+        validMatches.map((m) => m.id),
+      );
+      await updateFRIdeaRelation(notionClient, fr.id, mergedIds);
+      logger.info(`  Updated FR idea relations: ${validMatches.length} matches`);
+    } else {
+      logger.info(`  Found ${validMatches.length} idea matches (FR update skipped — dry run)`);
+    }
   } else {
     await notionClient.appendBlockChildren(
       prepResult.auditPageId,

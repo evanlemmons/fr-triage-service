@@ -18,6 +18,11 @@ on:
         required: false
         default: false
         type: boolean
+      write_audit:
+        description: 'Create audit page in Notion during dry run (FR properties untouched)'
+        required: false
+        default: false
+        type: boolean
       backtest:
         description: 'Backtest: re-process recent FRs regardless of status (implies dry run)'
         required: false
@@ -64,10 +69,13 @@ jobs:
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           VERBOSE: ${{ github.event.inputs.verbose || 'false' }}
           BACKTEST: ${{ github.event.inputs.backtest || 'false' }}
+          WRITE_AUDIT: ${{ github.event.inputs.write_audit || 'false' }}
         run: |
           PRODUCT="${{ github.event.inputs.product || 'home' }}"
           ARGS="--product $PRODUCT"
           if [ "$BACKTEST" = "true" ]; then
             ARGS="$ARGS --backtest --backtest-days ${{ github.event.inputs.backtest_days || '7' }}"
+          elif [ "$WRITE_AUDIT" = "true" ]; then
+            ARGS="$ARGS --write-audit"
           fi
           npx tsx src/index.ts $ARGS

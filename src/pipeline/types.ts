@@ -7,8 +7,10 @@ export interface PipelineConfig {
   product: ProductConfig;
   frDatabaseId: string;
   dryRun: boolean;
+  /** Write the Notion audit page even during dry-run. Skips FR relation updates but creates the audit doc so you can review in Notion. */
+  writeAudit: boolean;
   verbose: boolean;
-  /** Backtest mode: query recent FRs regardless of status instead of only unprocessed. Implies dryRun. */
+  /** Backtest mode: query recent FRs regardless of status instead of only unprocessed. Implies dryRun + writeAudit. */
   backtest: boolean;
   /** Number of days to look back in backtest mode. Default: 7 */
   backtestDays: number;

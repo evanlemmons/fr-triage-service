@@ -25,8 +25,11 @@ All triage happens in Notion. No GitHub issues are created.
 ## Usage
 
 ```bash
-# Triage Home product (dry run)
+# Dry run — console output only, no Notion writes at all
 npx tsx src/index.ts --product home --dry-run
+
+# Dry run with audit — creates audit page in Notion but doesn't touch FR properties
+npx tsx src/index.ts --product home --dry-run --write-audit
 
 # Triage Home product (live)
 npx tsx src/index.ts --product home
@@ -44,9 +47,19 @@ npx tsx src/index.ts --product home --backtest
 npx tsx src/index.ts --product home --backtest --backtest-days 14
 ```
 
+### Dry Run Modes
+
+There are three levels of dry run:
+
+| Mode | Audit page created? | FR relations updated? | Use case |
+|------|--------------------|-----------------------|----------|
+| `--dry-run` | No | No | Quick local testing, console output only |
+| `--dry-run --write-audit` | Yes | No | Review full audit in Notion without touching FRs |
+| `--backtest` | Yes | No | Compare against n8n using already-processed FRs |
+
 ### Backtest Mode
 
-Use `--backtest` to compare the new service against n8n's existing results. It queries all FRs from the last N days for a product regardless of their current status, then runs the full triage pipeline in dry-run mode. This lets you see how the service would classify and match FRs that n8n already processed without writing anything to Notion.
+Use `--backtest` to compare the new service against n8n's existing results. It queries all FRs from the last N days for a product regardless of their current status, then runs the full triage pipeline with audit page creation enabled. FR relation properties are never modified. This lets you review exactly how the service would classify and match FRs that n8n already processed, side-by-side in Notion.
 
 ## Environment Variables
 
@@ -57,8 +70,9 @@ Use `--backtest` to compare the new service against n8n's existing results. It q
 | `SLACK_BOT_TOKEN` | Yes | Slack bot OAuth token |
 | `LLM_PROVIDER` | No | `anthropic` (default) or `openai` |
 | `LLM_MODEL` | No | Model ID (default: `claude-sonnet-4-5-20250514`) |
-| `DRY_RUN` | No | `true` to log actions without writing to Notion |
-| `BACKTEST` | No | `true` to query recent FRs regardless of status (implies dry-run) |
+| `DRY_RUN` | No | `true` to skip FR relation updates |
+| `WRITE_AUDIT` | No | `true` to create audit page in Notion during dry-run |
+| `BACKTEST` | No | `true` to query recent FRs regardless of status (implies dry-run + write-audit) |
 | `VERBOSE` | No | `true` for debug logging |
 
 ## GitHub Actions

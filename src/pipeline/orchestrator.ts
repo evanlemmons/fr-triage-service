@@ -30,9 +30,13 @@ export async function runTriage(
   const llmProvider = (process.env.LLM_PROVIDER ?? 'anthropic') as 'anthropic' | 'openai';
   const llmModel = process.env.LLM_MODEL ?? product.llm.model ?? 'claude-sonnet-4-5-20250514';
 
+  // When writeAudit is enabled, allow Notion writes (the client won't gate them).
+  // FR relation updates are gated separately in process-fr.ts via config.dryRun.
+  const notionDryRun = dryRun && !config.writeAudit;
+
   const notionClient = new NotionClientWrapper({
     apiKey: notionApiKey,
-    dryRun,
+    dryRun: notionDryRun,
     logger,
   });
 
@@ -46,6 +50,8 @@ export async function runTriage(
   logger.info('Triage starting', {
     product: product.product.name,
     dryRun,
+    writeAudit: config.writeAudit,
+    backtest: config.backtest,
     llmProvider,
     llmModel,
   });
@@ -74,6 +80,7 @@ export async function runTriage(
         notionClient,
         llmClient,
         logger,
+        dryRun, // skipFRUpdates: true when dry-run (even with writeAudit)
       );
       results.push(result);
     } catch (err) {
