@@ -1,5 +1,6 @@
 import { NotionClientWrapper } from '../notion/client.js';
 import { LLMClient } from '../llm/client.js';
+import { updateAuditPageStatus } from '../notion/mutations.js';
 import { sendNoFrsMessage } from '../notifications/slack.js';
 import { buildDividerBlock } from '../audit/writer.js';
 import { runPrep } from './prep.js';
@@ -108,16 +109,32 @@ export async function runTriage(
 
   // Phase 3: Finalize
   logger.info('Finalizing triage run...');
-  await runFinalize(
-    prepResult,
-    results,
-    product,
-    notionClient,
-    llmClient,
-    logger,
-    dryRun,
-    config.testSlack,
-  );
+  try {
+    await runFinalize(
+      prepResult,
+      results,
+      product,
+      notionClient,
+      llmClient,
+      logger,
+      dryRun,
+      config.testSlack,
+    );
+  } catch (err) {
+    logger.error(`Finalization failed: ${err}`);
+    // Attempt to mark audit as error even if finalization fails
+    try {
+      await updateAuditPageStatus(
+        notionClient,
+        prepResult.auditPageId,
+        'Error',
+        `Finalization step failed: ${err}\n\nCheck logs for details.`,
+      );
+    } catch (updateErr) {
+      logger.error(`Failed to update audit status after finalization error: ${updateErr}`);
+    }
+    throw err; // Re-throw to maintain error visibility
+  }
 
   const totalErrors = results.reduce((sum, r) => sum + r.errors.length, 0);
   logger.info('Triage complete', {

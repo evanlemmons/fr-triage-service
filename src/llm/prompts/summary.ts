@@ -18,17 +18,17 @@ Linking rules:
 - For each FR in "Needs Attention", include a clickable link to the FR Notion page if available
 
 "Needs attention" criteria (flag an FR if ANY apply):
-- Product misalignment: Verdict does not match current product OR suggested product is different OR callout indicates FR doesn't belong
-- No Idea matches present OR explicit warning about no ideas
-- No Pulse matches present OR explicit warning about no pulse items
-- Any match (Pulse or Idea) has Low confidence (<70%)
-- Product alignment verdict is "Uncertain" OR alignment confidence <70%
+- Product misalignment: Verdict does not match current product OR suggested product is different OR alignment confidence <70% OR verdict is "Uncertain"
+- No Pulse matches found OR any Pulse match has Low confidence (<70%)
+- No Idea matches found OR any Idea match has Low confidence (<70%)
 
 Rules:
 - Do not invent data. Use only what appears in the audit content
 - Keep it short and skimmable for Slack
 - Use Slack mrkdwn only: bold headings with *text*, bullet lists with •, and Slack links as <url|text>
 - If a FR Notion URL is available, use it in the link; otherwise just show the title without a link
+- IMPORTANT: Consolidate ALL issues (misalignment + missing matches + low confidence) into a single "Needs Attention" section
+- Do NOT create a separate "Misaligned FRs" section
 
 OUTPUT FORMAT (must match exactly):
 
@@ -38,17 +38,10 @@ OUTPUT FORMAT (must match exactly):
 *Summary*
 • FRs reviewed: X
 • FRs needing attention: X
-• FRs misaligned: X
-
-*Misaligned FRs*
-• <FR_URL|FR: Title> — Suggested: [Product Name]
-• <FR_URL|FR: Title> — Suggested: [Product Name]
-
-(If no FRs are misaligned, omit this section)
 
 *Needs Attention*
-• <FR_URL|FR: Title> — Reason: [brief reason]
-• <FR_URL|FR: Title> — Reason: [brief reason]
+• <FR_URL|FR: Title> — Reason: [brief reason explaining the issue: misalignment/no matches/low confidence]
+• <FR_URL|FR: Title> — Reason: [brief reason explaining the issue]
 
 (If no FRs need attention, just say "All FRs processed successfully")
 

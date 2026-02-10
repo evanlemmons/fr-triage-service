@@ -104,3 +104,39 @@ export async function finalizeAuditPage(
     } as any,
   });
 }
+
+/**
+ * Update the audit page with final status and notes.
+ * Replaces finalizeAuditPage for more granular control over audit status.
+ */
+export async function updateAuditPageStatus(
+  client: NotionClientWrapper,
+  auditPageId: string,
+  status: 'Complete' | 'Error' | 'Needs Attention',
+  notes?: string,
+): Promise<void> {
+  const properties: any = {
+    Status: {
+      status: { name: status },
+    },
+    'Completed time': {
+      date: { start: new Date().toISOString() },
+    },
+  };
+
+  // Add Notes property if provided, with truncation to prevent exceeding Notion's 2000 char limit
+  if (notes) {
+    const truncatedNotes = notes.length > 1900
+      ? notes.substring(0, 1900) + '...\n\n[See audit page for full details]'
+      : notes;
+
+    properties.Notes = {
+      rich_text: [{ text: { content: truncatedNotes } }],
+    };
+  }
+
+  await client.updatePage({
+    page_id: auditPageId,
+    properties,
+  });
+}

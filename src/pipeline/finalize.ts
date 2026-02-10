@@ -1,7 +1,7 @@
 import type { NotionClientWrapper } from '../notion/client.js';
 import type { LLMClient } from '../llm/client.js';
 import { getPageContent } from '../notion/blocks.js';
-import { finalizeAuditPage } from '../notion/mutations.js';
+import { finalizeAuditPage, updateAuditPageStatus } from '../notion/mutations.js';
 import { buildCompletedBlock } from '../audit/writer.js';
 import { buildSummaryPrompt } from '../llm/prompts/summary.js';
 import { sendSlackMessage } from '../notifications/slack.js';
@@ -32,9 +32,16 @@ export async function runFinalize(
     buildCompletedBlock(),
   );
 
-  // 2. Update audit page status
-  logger.info('Updating audit page status to Complete');
-  await finalizeAuditPage(notionClient, prepResult.auditPageId);
+  // 2. Update audit page status based on processing results
+  logger.info('Determining final audit status...');
+  const statusDecision = determineAuditStatus(results, config.product.name);
+  logger.info(`Setting audit status to: ${statusDecision.status}`);
+  await updateAuditPageStatus(
+    notionClient,
+    prepResult.auditPageId,
+    statusDecision.status,
+    statusDecision.notes,
+  );
 
   // 3. Generate Slack summary
   logger.info('Generating Slack summary...');
@@ -101,4 +108,79 @@ async function generateSummaryText(
     logger.warn('Structured summary generation failed, using fallback');
     return `Triage complete. Check the audit page for details.`;
   }
+}
+
+/**
+ * Determine the final status for the audit page based on processing results.
+ *
+ * Decision logic:
+ * - "Error": Any technical/breaking errors occurred (LLM failures, API errors, etc.)
+ * - "Needs Attention": All FRs processed successfully BUT at least one has business issues:
+ *   - Product misalignment (verdict doesn't match product OR suggested_product differs OR low confidence <70%)
+ *   - No Pulse matches found
+ *   - No Idea matches found
+ *   - Any match (Pulse or Idea) has low confidence (<70%)
+ * - "Complete": All FRs processed successfully with no business issues
+ */
+function determineAuditStatus(
+  results: FRProcessingResult[],
+  productName: string,
+): { status: 'Complete' | 'Error' | 'Needs Attention'; notes?: string } {
+  // Check for technical errors first (highest priority)
+  const technicalErrors = results.filter(r => r.errors.length > 0);
+  if (technicalErrors.length > 0) {
+    const errorDetails = technicalErrors
+      .map(r => `FR "${r.frTitle}": ${r.errors.join(', ')}`)
+      .join('\n');
+
+    return {
+      status: 'Error',
+      notes: `Technical errors occurred during processing:\n\n${errorDetails}\n\nPlease review logs and retry if needed.`,
+    };
+  }
+
+  // Check for business logic issues (FRs needing attention)
+  const frsNeedingAttention = results.filter(r => {
+    // Product misalignment checks
+    const verdictLower = r.alignment.verdict.toLowerCase();
+    const productNameLower = productName.toLowerCase();
+    const verdictMismatch = !(
+      verdictLower === productNameLower ||
+      verdictLower === 'home' || // backward compat
+      verdictLower === 'belongs'
+    );
+    const suggestedProductDiffers = r.alignment.suggested_product.trim() !== '' &&
+      r.alignment.suggested_product.toLowerCase() !== productNameLower;
+    const lowAlignmentConfidence = r.alignment.confidence < 0.70;
+    const uncertainVerdict = verdictLower === 'uncertain';
+
+    const productIssue = verdictMismatch || suggestedProductDiffers ||
+                        lowAlignmentConfidence || uncertainVerdict;
+
+    // Matching issues
+    const noPulseMatches = r.belongsToProduct && r.pulseMatches.length === 0;
+    const noIdeaMatches = r.belongsToProduct && r.ideaMatches.length === 0;
+    const lowConfidenceMatches = [
+      ...r.pulseMatches,
+      ...r.ideaMatches,
+    ].some(m => m.confidence < 0.70);
+
+    return productIssue || noPulseMatches || noIdeaMatches || lowConfidenceMatches;
+  });
+
+  if (frsNeedingAttention.length > 0) {
+    const frCount = results.length;
+    const attentionCount = frsNeedingAttention.length;
+
+    return {
+      status: 'Needs Attention',
+      notes: `${attentionCount} of ${frCount} FRs need manual review due to misalignment, low confidence, or missing matches.\n\nReview the audit page for details. After addressing issues, you may manually change this status to "Complete".`,
+    };
+  }
+
+  // All FRs processed successfully with no issues
+  return {
+    status: 'Complete',
+    // No notes needed for successful completion
+  };
 }
