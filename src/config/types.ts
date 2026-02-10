@@ -3,6 +3,7 @@ export interface ProductConfig {
     name: string;
     selectValue: string;
     productPageId: string;
+    enabled?: boolean; // Whether this product is enabled for triage (defaults to true)
   };
   productInfo: {
     pageId: string;

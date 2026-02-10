@@ -41,7 +41,18 @@ export async function loadProductConfig(productName: string): Promise<ProductCon
     );
   }
 
-  return result.data as ProductConfig;
+  const config = result.data as ProductConfig;
+
+  // Check if product is enabled (defaults to true if not specified)
+  const isEnabled = config.product.enabled ?? true;
+  if (!isEnabled) {
+    throw new ConfigError(
+      `Product "${productName}" is disabled. Set "enabled: true" in ${filePath} to enable.`,
+      { productName, filePath },
+    );
+  }
+
+  return config;
 }
 
 export async function listAvailableProducts(): Promise<string[]> {
