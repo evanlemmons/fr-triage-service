@@ -1,7 +1,6 @@
 import { NotionClientWrapper } from '../notion/client.js';
 import { LLMClient } from '../llm/client.js';
 import { updateAuditPageStatus } from '../notion/mutations.js';
-import { sendNoFrsMessage } from '../notifications/slack.js';
 import { buildDividerBlock } from '../audit/writer.js';
 import { runPrep } from './prep.js';
 import { processFR } from './process-fr.js';
@@ -63,7 +62,7 @@ export async function runTriage(
 
   if (!prepResult) {
     // No FRs to process
-    await sendNoFrsMessage(product.notifications.slack, logger, dryRun);
+    logger.info('No unprocessed FRs found for this product');
     return { frCount: 0, status: 'no_frs' };
   }
 
