@@ -10,6 +10,7 @@ export interface ProductConfig {
   matching: {
     pulse: PulseMatchingConfig;
     ideas: IdeasMatchingConfig;
+    batchSize?: number;
   };
   audit: {
     databaseId: string;
@@ -61,6 +62,10 @@ export interface SlackNotificationConfig {
   enabled: boolean;
   noFrsChannelId?: string;
   summaryTarget: {
+    type: 'user' | 'channel';
+    id: string;
+  };
+  errorTarget?: {
     type: 'user' | 'channel';
     id: string;
   };

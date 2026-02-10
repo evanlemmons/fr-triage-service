@@ -16,6 +16,13 @@ export interface PipelineConfig {
   backtest: boolean;
   /** Number of days to look back in backtest mode. Default: 7 */
   backtestDays: number;
+  /** Batch information for audit page naming. */
+  batchInfo?: {
+    current: number;
+    total: number;
+  };
+  /** Pre-queried FRs to process (for batching). If provided, skips query in prep phase. */
+  preQueriedFRs?: FeatureRequest[];
 }
 
 export interface PrepResult {

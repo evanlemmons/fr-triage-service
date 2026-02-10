@@ -81,3 +81,35 @@ export async function sendNoFrsMessage(
 
   logger.info('Sent "No new FRs" message', { channelId });
 }
+
+/**
+ * Send an error notification to Slack.
+ * Uses errorTarget if configured, falls back to summaryTarget.
+ */
+export async function sendErrorNotification(
+  config: SlackNotificationConfig,
+  errorMessage: string,
+  repoUrl: string,
+  logger: Logger,
+): Promise<void> {
+  if (!config.enabled) {
+    logger.debug('Slack notifications disabled, skipping error notification');
+    return;
+  }
+
+  const client = getSlackClient();
+  const target = config.errorTarget ?? config.summaryTarget;
+
+  const text = `:rotating_light: *FR Triage Service Error*\n\n${errorMessage}\n\n<${repoUrl}|View GitHub Repository>`;
+
+  try {
+    await client.chat.postMessage({
+      channel: target.id,
+      text,
+    });
+    logger.info('Slack error notification sent', { target });
+  } catch (err) {
+    logger.error(`Failed to send Slack error notification: ${err}`);
+    // Don't throw - we don't want Slack failures to mask the original error
+  }
+}

@@ -17,12 +17,16 @@ export async function runPrep(
   config: PipelineConfig,
   logger: Logger,
 ): Promise<PrepResult | null> {
-  const { product, frDatabaseId } = config;
+  const { product, frDatabaseId, preQueriedFRs } = config;
 
-  // 1. Query FRs
+  // 1. Query FRs (or use pre-queried)
   let featureRequests;
 
-  if (config.backtest) {
+  if (preQueriedFRs) {
+    // Batching mode: FRs were pre-queried in index.ts
+    featureRequests = preQueriedFRs;
+    logger.info(`Using pre-queried batch: ${featureRequests.length} FRs`);
+  } else if (config.backtest) {
     logger.info(`[BACKTEST] Querying last ${config.backtestDays} days of FRs for product: ${product.product.name} (any status)`);
     featureRequests = await queryRecentFRs(
       notionClient,
@@ -80,13 +84,14 @@ export async function runPrep(
     ideaCount: ideaTitles.length,
   });
 
-  // 3. Create audit page
+  // 3. Create audit page with batch info
   logger.info('Creating audit page...');
   const { id: auditPageId, url: auditPageUrl } = await createAuditPage(
     notionClient,
     product.audit.databaseId,
     product.product.productPageId,
     featureRequests.length,
+    config.batchInfo,
   );
 
   logger.info('Audit page created', { auditPageId, auditPageUrl });

@@ -8,13 +8,18 @@ export async function createAuditPage(
   auditDatabaseId: string,
   productPageId: string,
   frCount: number,
+  batchInfo?: { current: number; total: number },
 ): Promise<{ id: string; url: string }> {
+  // Generate title with batch info if provided
+  const batchLabel = batchInfo ? ` (Batch ${batchInfo.current}/${batchInfo.total})` : '';
+  const titleText = `New FR Audit${batchLabel}`;
+
   const page = await client.createPage({
     parent: { database_id: auditDatabaseId },
     icon: { type: 'emoji', emoji: '🤖' } as any,
     properties: {
       title: {
-        title: [{ text: { content: 'New FR Audit' } }],
+        title: [{ text: { content: titleText } }],
       },
       Status: {
         status: { name: 'In progress' },

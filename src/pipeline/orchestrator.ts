@@ -122,6 +122,21 @@ export async function runTriage(
     );
   } catch (err) {
     logger.error(`Finalization failed: ${err}`);
+
+    // Send Slack error notification
+    try {
+      const { sendErrorNotification } = await import('../notifications/slack.js');
+      const repoUrl = 'https://github.com/evanlemmons/fr-triage-service';
+      await sendErrorNotification(
+        product.notifications.slack,
+        `Finalization failed for product "${product.product.name}": ${err}`,
+        repoUrl,
+        logger,
+      );
+    } catch (slackErr) {
+      logger.error(`Failed to send error notification: ${slackErr}`);
+    }
+
     // Attempt to mark audit as error even if finalization fails
     try {
       await updateAuditPageStatus(

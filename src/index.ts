@@ -66,30 +66,141 @@ async function main() {
 
     try {
       const config = await loadProductConfig(name);
+      const batchSize = config.matching.batchSize ?? 25;
 
-      const result = await runTriage(
-        {
-          product: config,
-          frDatabaseId: FR_DATABASE_ID,
-          dryRun,
-          writeAudit,
-          testSlack,
-          verbose,
-          backtest,
-          backtestDays,
-        },
+      // Import query functions and Notion client to query all FRs upfront
+      const { queryUnprocessedFRs, queryRecentFRs } = await import('./notion/queries.js');
+      const { NotionClientWrapper } = await import('./notion/client.js');
+
+      const notionClient = new NotionClientWrapper({
+        apiKey: process.env.NOTION_API_KEY!,
+        dryRun: false, // Need to query real data
         logger,
-      );
+      });
 
-      if (result.status === 'complete') {
-        logger.info(`Triage complete for ${name}. Processed ${result.frCount} FRs.`);
-      } else if (result.status === 'no_frs') {
-        logger.info(`No unprocessed FRs for ${name}.`);
+      // Query ALL unprocessed FRs for this product
+      let allFRs;
+      if (backtest) {
+        logger.info(`[BACKTEST] Querying last ${backtestDays} days of FRs (any status)`);
+        allFRs = await queryRecentFRs(
+          notionClient,
+          FR_DATABASE_ID,
+          config.product.selectValue,
+          backtestDays,
+        );
       } else {
-        logger.warn(`Triage completed with errors for ${name}.`);
+        logger.info(`Querying unprocessed FRs for product: ${name}`);
+        allFRs = await queryUnprocessedFRs(
+          notionClient,
+          FR_DATABASE_ID,
+          config.product.selectValue,
+        );
       }
+
+      if (allFRs.length === 0) {
+        logger.info(`No unprocessed FRs for ${name}.`);
+        continue;
+      }
+
+      // Split into batches
+      const batches = [];
+      for (let i = 0; i < allFRs.length; i += batchSize) {
+        batches.push(allFRs.slice(i, i + batchSize));
+      }
+
+      logger.info(`Found ${allFRs.length} FRs, processing in ${batches.length} batch(es) of up to ${batchSize} FRs each`);
+
+      // Process each batch
+      let totalProcessed = 0;
+      let totalErrors = 0;
+
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        const batchLabel = batches.length > 1 ? ` (Batch ${batchIndex + 1}/${batches.length})` : '';
+
+        logger.info(`\n${'─'.repeat(60)}`);
+        logger.info(`Processing batch ${batchIndex + 1}/${batches.length}: ${batch.length} FRs${batchLabel}`);
+        logger.info(`${'─'.repeat(60)}`);
+
+        try {
+          const result = await runTriage(
+            {
+              product: config,
+              frDatabaseId: FR_DATABASE_ID,
+              dryRun,
+              writeAudit,
+              testSlack,
+              verbose,
+              backtest,
+              backtestDays,
+              batchInfo: batches.length > 1 ? {
+                current: batchIndex + 1,
+                total: batches.length,
+              } : undefined,
+              preQueriedFRs: batch,
+            },
+            logger,
+          );
+
+          if (result.status === 'complete') {
+            logger.info(`Batch ${batchIndex + 1}/${batches.length} complete. Processed ${result.frCount} FRs.`);
+            totalProcessed += result.frCount;
+          } else if (result.status === 'error') {
+            logger.warn(`Batch ${batchIndex + 1}/${batches.length} completed with errors.`);
+            totalErrors++;
+            totalProcessed += result.frCount;
+          }
+        } catch (err) {
+          logger.error(`Batch ${batchIndex + 1}/${batches.length} failed: ${err}`);
+          totalErrors++;
+
+          // Send error notification for batch failure
+          try {
+            const { sendErrorNotification } = await import('./notifications/slack.js');
+            const repoUrl = 'https://github.com/evanlemmons/fr-triage-service';
+            await sendErrorNotification(
+              config.notifications.slack,
+              `Batch ${batchIndex + 1}/${batches.length} failed for product "${name}": ${err}`,
+              repoUrl,
+              logger,
+            );
+          } catch (slackErr) {
+            logger.error(`Failed to send error notification: ${slackErr}`);
+          }
+
+          // Continue with next batch even if this one fails
+        }
+
+        // Add delay between batches to avoid rate limits (except for last batch)
+        if (batchIndex < batches.length - 1) {
+          logger.info('Waiting 5 seconds before next batch...');
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+      }
+
+      logger.info(`\nTriage complete for ${name}. Processed ${totalProcessed} FRs across ${batches.length} batch(es).`);
+      if (totalErrors > 0) {
+        logger.warn(`${totalErrors} batch(es) had errors.`);
+      }
+
     } catch (err) {
       logger.error(`Triage failed for ${name}: ${err}`);
+
+      // Send Slack error notification
+      try {
+        const { sendErrorNotification } = await import('./notifications/slack.js');
+        const repoUrl = 'https://github.com/evanlemmons/fr-triage-service';
+        const config = await loadProductConfig(name);
+        await sendErrorNotification(
+          config.notifications.slack,
+          `Triage failed for product "${name}": ${err}`,
+          repoUrl,
+          logger,
+        );
+      } catch (slackErr) {
+        logger.error(`Failed to send error notification: ${slackErr}`);
+      }
+
       if (productNames.length === 1) {
         process.exit(1);
       }

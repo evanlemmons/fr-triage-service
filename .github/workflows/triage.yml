@@ -2,9 +2,11 @@ name: Feature Request Triage
 
 on:
   schedule:
-    # Runs at 10:00 UTC (6 AM EDT / 5 AM EST), weekdays
-    # Note: Cron runs in UTC and doesn't adjust for DST automatically
-    - cron: '0 10 * * 1-5'
+    # Runs at 11:00 UTC (6 AM EST / 7 AM EDT), Mondays only
+    # Note: Cron runs in UTC and doesn't adjust for DST automatically.
+    # During EST (Nov-Mar): runs at 6 AM local time
+    # During EDT (Mar-Nov): runs at 7 AM local time
+    - cron: '0 11 * * 1'
   workflow_dispatch:
     inputs:
       product:
@@ -90,3 +92,29 @@ jobs:
             ARGS="$ARGS --test-slack"
           fi
           npx tsx src/index.ts $ARGS
+
+      - name: Notify Slack on workflow failure
+        if: failure()
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        run: |
+          npx tsx -e "
+          import { WebClient } from '@slack/web-api';
+          import { loadProductConfig } from './src/config/loader.js';
+
+          const productName = '${{ github.event.inputs.product || 'home' }}';
+          const repoUrl = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
+
+          const config = await loadProductConfig(productName);
+          if (!config.notifications.slack.enabled) process.exit(0);
+
+          const target = config.notifications.slack.errorTarget ?? config.notifications.slack.summaryTarget;
+          const client = new WebClient(process.env.SLACK_BOT_TOKEN);
+
+          const text = ':rotating_light: *FR Triage Workflow Failed*\n\nProduct: ' + productName + '\n\n<' + repoUrl + '|View GitHub Actions Run>';
+
+          await client.chat.postMessage({
+            channel: target.id,
+            text,
+          });
+          "

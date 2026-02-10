@@ -26,6 +26,9 @@ matching:
     shortlistMax: 20
     confidenceThreshold: 0.75
 
+  # Maximum FRs per audit document (default: 25)
+  batchSize: 25
+
 audit:
   databaseId: "2c6abbce-69a2-807c-80c7-e5900283ead1"
 
@@ -216,10 +219,14 @@ notifications:
     summaryTarget:
       type: "user"
       id: "UBMGWSSS1"
+    # Optional: dedicated error notification target (defaults to summaryTarget)
+    errorTarget:
+      type: "user"
+      id: "UBMGWSSS1"
 
 schedule:
-  # Runs at 10:00 UTC (6 AM EDT / 5 AM EST)
+  # Runs at 11:00 UTC (6 AM EST / 7 AM EDT), Mondays only
   # Note: GitHub Actions cron runs in UTC and doesn't adjust for DST automatically.
-  # During Eastern Daylight Time (Mar-Nov): runs at 6 AM ET
-  # During Eastern Standard Time (Nov-Mar): runs at 5 AM ET
-  cron: "0 10 * * 1-5"
+  # During Eastern Standard Time (Nov-Mar): runs at 6 AM local time
+  # During Eastern Daylight Time (Mar-Nov): runs at 7 AM local time
+  cron: "0 11 * * 1"
