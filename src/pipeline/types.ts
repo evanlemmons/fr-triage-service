@@ -9,6 +9,8 @@ export interface PipelineConfig {
   dryRun: boolean;
   /** Write the Notion audit page even during dry-run. Skips FR relation updates but creates the audit doc so you can review in Notion. */
   writeAudit: boolean;
+  /** Force Slack notification to be sent even in dry-run mode (for testing). */
+  testSlack: boolean;
   verbose: boolean;
   /** Backtest mode: query recent FRs regardless of status instead of only unprocessed. Implies dryRun + writeAudit. */
   backtest: boolean;

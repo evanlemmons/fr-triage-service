@@ -25,6 +25,11 @@ on:
         required: false
         default: false
         type: boolean
+      test_slack:
+        description: 'Send actual Slack notification even in dry-run/backtest mode (for testing)'
+        required: false
+        default: false
+        type: boolean
       backtest:
         description: 'Backtest: re-process recent FRs regardless of status (implies dry run)'
         required: false
@@ -72,6 +77,7 @@ jobs:
           VERBOSE: ${{ github.event.inputs.verbose || 'false' }}
           BACKTEST: ${{ github.event.inputs.backtest || 'false' }}
           WRITE_AUDIT: ${{ github.event.inputs.write_audit || 'false' }}
+          TEST_SLACK: ${{ github.event.inputs.test_slack || 'false' }}
         run: |
           PRODUCT="${{ github.event.inputs.product || 'home' }}"
           ARGS="--product $PRODUCT"
@@ -79,5 +85,8 @@ jobs:
             ARGS="$ARGS --backtest --backtest-days ${{ github.event.inputs.backtest_days || '7' }}"
           elif [ "$WRITE_AUDIT" = "true" ]; then
             ARGS="$ARGS --write-audit"
+          fi
+          if [ "$TEST_SLACK" = "true" ]; then
+            ARGS="$ARGS --test-slack"
           fi
           npx tsx src/index.ts $ARGS

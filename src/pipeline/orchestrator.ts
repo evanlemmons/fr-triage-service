@@ -107,6 +107,7 @@ export async function runTriage(
     llmClient,
     logger,
     dryRun,
+    config.testSlack,
   );
 
   const totalErrors = results.reduce((sum, r) => sum + r.errors.length, 0);

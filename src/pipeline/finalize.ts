@@ -23,6 +23,7 @@ export async function runFinalize(
   llmClient: LLMClient,
   logger: Logger,
   dryRun: boolean,
+  testSlack: boolean,
 ): Promise<void> {
   // 1. Write completed block
   logger.info('Writing completed block to audit page');
@@ -58,11 +59,12 @@ export async function runFinalize(
     );
 
     // 4. Send to Slack
+    // If testSlack is true, force Slack to send even in dry-run mode
     await sendSlackMessage(
       config.notifications.slack,
       summaryText,
       logger,
-      dryRun,
+      dryRun && !testSlack,
     );
   } catch (err) {
     logger.error(`Failed to generate/send Slack summary: ${err}`);

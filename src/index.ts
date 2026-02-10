@@ -11,6 +11,7 @@ async function main() {
       product: { type: 'string', short: 'p', default: 'home' },
       'dry-run': { type: 'boolean', default: false },
       'write-audit': { type: 'boolean', default: false },
+      'test-slack': { type: 'boolean', default: false },
       backtest: { type: 'boolean', default: false },
       'backtest-days': { type: 'string', default: '7' },
       verbose: { type: 'boolean', short: 'v', default: false },
@@ -22,6 +23,7 @@ async function main() {
   const verbose = values.verbose || process.env.VERBOSE === 'true';
   const backtest = values.backtest || process.env.BACKTEST === 'true';
   const backtestDays = parseInt(values['backtest-days'] ?? '7', 10);
+  const testSlack = values['test-slack'] || process.env.TEST_SLACK === 'true';
   // Backtest always implies dry-run — it should never modify FR properties
   const dryRun = backtest || values['dry-run'] || process.env.DRY_RUN === 'true';
   // Backtest implies write-audit so you can review in Notion
@@ -34,6 +36,10 @@ async function main() {
     logger.info('DRY RUN with audit: audit page will be created in Notion, FR properties untouched');
   } else if (dryRun) {
     logger.info('DRY RUN: no Notion writes at all (use --write-audit to create audit page)');
+  }
+
+  if (testSlack) {
+    logger.info('TEST SLACK MODE: Slack notification will be sent even in dry-run mode');
   }
 
   // List available products and exit
@@ -67,6 +73,7 @@ async function main() {
           frDatabaseId: FR_DATABASE_ID,
           dryRun,
           writeAudit,
+          testSlack,
           verbose,
           backtest,
           backtestDays,
