@@ -1,0 +1,72 @@
+# Template for adding a new product to the FR Triage Service
+# Copy this file and rename it to your product name (e.g., groups.yml)
+# Fill in all required fields below.
+
+product:
+  name: "YOUR_PRODUCT_NAME"        # e.g., "Groups"
+  selectValue: "YOUR_PRODUCT_NAME"  # Must match the Product select value in the FR database
+  productPageId: "YOUR_PRODUCT_PAGE_ID"  # Notion page ID for this product (used in relation filters)
+
+productInfo:
+  pageId: "YOUR_PRODUCT_INFO_PAGE_ID"  # Notion page with product description and FR handling guidelines
+
+matching:
+  pulse:
+    enabled: true
+    databaseId: "9991fd12-b634-43ac-aec8-8fc7bec9a319"  # Product Pulse DB (shared)
+    filters:
+      statusNotEquals: "Done"
+    fetchContent: true
+    confidenceThreshold: 0.75
+
+  ideas:
+    enabled: true
+    databaseId: "12eabbce-69a2-80ac-9ed7-f3344d2d6ec1"  # Ideas Database (shared)
+    filters:
+      statusNotEquals:
+        - "Complete"
+        - "Archived"
+    twoPhaseMatching: true
+    shortlistMax: 20
+    confidenceThreshold: 0.75
+
+audit:
+  databaseId: "2c6abbce-69a2-807c-80c7-e5900283ead1"  # AI Feature Request Triage DB (shared)
+
+llm:
+  prompts:
+    productAlignment:
+      systemPrompt: |
+        # TODO: Write a product-specific alignment prompt.
+        # Model it after the Home prompt in home.yml.
+        # Key things to define:
+        # - What this product IS (its scope, features, surfaces)
+        # - What it is NOT (boundaries with other products)
+        # - Decision heuristics for classification
+        # - Hard rules for definitive cases
+        # - Language guidelines for ambiguous terms
+
+    pulseMatching:
+      systemPrompt: |
+        # TODO: Write a pulse matching prompt.
+        # You can often reuse the Home version with product name changes.
+
+    ideaShortlist:
+      systemPrompt: |
+        # TODO: Write an idea shortlisting prompt.
+        # You can often reuse the Home version with product name changes.
+
+    ideaMatching:
+      systemPrompt: |
+        # TODO: Write an idea matching prompt.
+        # You can often reuse the Home version with product name changes.
+
+notifications:
+  slack:
+    enabled: true
+    summaryTarget:
+      type: "user"            # or "channel"
+      id: "YOUR_SLACK_ID"    # Slack user ID or channel ID
+
+schedule:
+  cron: "0 11 * * 1-5"       # 6 AM ET, weekdays

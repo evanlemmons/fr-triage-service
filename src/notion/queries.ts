@@ -1,0 +1,144 @@
+import type { NotionClientWrapper } from './client.js';
+import { richTextToPlainText, getPageContent } from './blocks.js';
+import type { FeatureRequest, PulseItem, IdeaTitle } from './types.js';
+
+/**
+ * Query unprocessed feature requests for a specific product.
+ * Filters: Product == selectValue AND Status == "Unprocessed"
+ */
+export async function queryUnprocessedFRs(
+  client: NotionClientWrapper,
+  frDatabaseId: string,
+  productSelectValue: string,
+): Promise<FeatureRequest[]> {
+  const results = await client.queryDatabase({
+    database_id: frDatabaseId,
+    filter: {
+      and: [
+        {
+          property: 'Product',
+          select: { equals: productSelectValue },
+        },
+        {
+          property: 'Status',
+          status: { equals: 'Unprocessed' },
+        },
+      ],
+    },
+  });
+
+  return results.map((page: any) => ({
+    id: page.id,
+    url: page.url ?? '',
+    title: extractTitle(page, 'Feature Request'),
+    content: extractRichText(page, 'Description'),
+    existingPulseRelationIds: extractRelationIds(page, 'Product Pulse'),
+    existingIdeaRelationIds: extractRelationIds(page, 'Ideas Database'),
+  }));
+}
+
+/**
+ * Query active Pulse items for a product.
+ * Filters: Status != statusNotEquals AND Products relation contains productPageId
+ * Fetches full page content for each pulse item.
+ */
+export async function queryPulseItems(
+  client: NotionClientWrapper,
+  pulseDatabaseId: string,
+  productPageId: string,
+  statusNotEquals: string,
+): Promise<PulseItem[]> {
+  const results = await client.queryDatabase({
+    database_id: pulseDatabaseId,
+    filter: {
+      and: [
+        {
+          property: 'Status',
+          status: { does_not_equal: statusNotEquals },
+        },
+        {
+          property: 'Products',
+          relation: { contains: productPageId },
+        },
+      ],
+    },
+  });
+
+  const items: PulseItem[] = [];
+
+  for (const page of results) {
+    const title = extractTitle(page, 'Problem or Opportunity');
+    const content = await getPageContent(client, page.id);
+    items.push({
+      id: page.id,
+      title,
+      content,
+    });
+  }
+
+  return items;
+}
+
+/**
+ * Query active Idea items for a product (titles and IDs only).
+ * Filters: Products relation contains productPageId AND status not in statusNotEquals
+ */
+export async function queryIdeaTitles(
+  client: NotionClientWrapper,
+  ideasDatabaseId: string,
+  productPageId: string,
+  statusNotEquals: string[],
+): Promise<IdeaTitle[]> {
+  const statusFilters = statusNotEquals.map((status) => ({
+    property: 'Idea Status',
+    status: { does_not_equal: status },
+  }));
+
+  const results = await client.queryDatabase({
+    database_id: ideasDatabaseId,
+    filter: {
+      and: [
+        {
+          property: 'Products',
+          relation: { contains: productPageId },
+        },
+        ...statusFilters,
+      ],
+    },
+  });
+
+  return results.map((page: any) => ({
+    id: page.id,
+    title: extractTitle(page, 'Name'),
+  }));
+}
+
+// --- Helper functions ---
+
+function extractTitle(page: any, propertyName: string): string {
+  const prop = page.properties?.[propertyName];
+  if (!prop) return '';
+
+  if (prop.type === 'title' && Array.isArray(prop.title)) {
+    return richTextToPlainText(prop.title);
+  }
+  return '';
+}
+
+function extractRichText(page: any, propertyName: string): string {
+  const prop = page.properties?.[propertyName];
+  if (!prop) return '';
+
+  if (prop.type === 'rich_text' && Array.isArray(prop.rich_text)) {
+    return richTextToPlainText(prop.rich_text);
+  }
+  return '';
+}
+
+function extractRelationIds(page: any, propertyName: string): string[] {
+  const prop = page.properties?.[propertyName];
+  if (!prop || prop.type !== 'relation' || !Array.isArray(prop.relation)) {
+    return [];
+  }
+  return prop.relation.map((r: any) => r.id).filter(Boolean);
+}

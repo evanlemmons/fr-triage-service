@@ -1,0 +1,58 @@
+name: Feature Request Triage
+
+on:
+  schedule:
+    - cron: '0 11 * * 1-5'  # 6 AM ET (UTC-5), weekdays
+  workflow_dispatch:
+    inputs:
+      product:
+        description: 'Product to triage'
+        required: true
+        default: 'home'
+        type: choice
+        options:
+          - home
+          - all
+      dry_run:
+        description: 'Dry run (log actions without writing to Notion)'
+        required: false
+        default: false
+        type: boolean
+      verbose:
+        description: 'Enable verbose logging'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run triage
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'anthropic' }}
+          LLM_MODEL: ${{ vars.LLM_MODEL || 'claude-sonnet-4-5-20250514' }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          VERBOSE: ${{ github.event.inputs.verbose || 'false' }}
+        run: |
+          PRODUCT="${{ github.event.inputs.product || 'home' }}"
+          npx tsx src/index.ts --product "$PRODUCT"
