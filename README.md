@@ -36,7 +36,17 @@ npx tsx src/index.ts --product all
 
 # List available products
 npx tsx src/index.ts --list-products
+
+# Backtest: re-process last 7 days of FRs regardless of status (dry-run enforced)
+npx tsx src/index.ts --product home --backtest
+
+# Backtest with custom lookback window
+npx tsx src/index.ts --product home --backtest --backtest-days 14
 ```
+
+### Backtest Mode
+
+Use `--backtest` to compare the new service against n8n's existing results. It queries all FRs from the last N days for a product regardless of their current status, then runs the full triage pipeline in dry-run mode. This lets you see how the service would classify and match FRs that n8n already processed without writing anything to Notion.
 
 ## Environment Variables
 
@@ -48,6 +58,7 @@ npx tsx src/index.ts --list-products
 | `LLM_PROVIDER` | No | `anthropic` (default) or `openai` |
 | `LLM_MODEL` | No | Model ID (default: `claude-sonnet-4-5-20250514`) |
 | `DRY_RUN` | No | `true` to log actions without writing to Notion |
+| `BACKTEST` | No | `true` to query recent FRs regardless of status (implies dry-run) |
 | `VERBOSE` | No | `true` for debug logging |
 
 ## GitHub Actions
@@ -55,7 +66,7 @@ npx tsx src/index.ts --list-products
 The workflow at `.github/workflows/triage.yml` supports:
 
 - **Scheduled runs**: Weekdays at 6 AM ET
-- **Manual dispatch**: Pick a product, toggle dry-run and verbose logging
+- **Manual dispatch**: Pick a product, toggle dry-run, backtest, and verbose logging
 
 Set secrets in the repo settings: `NOTION_API_KEY`, `LLM_API_KEY`, `SLACK_BOT_TOKEN`.
 

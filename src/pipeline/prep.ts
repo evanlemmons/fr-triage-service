@@ -1,7 +1,7 @@
 import type { NotionClientWrapper } from '../notion/client.js';
 import type { LLMClient } from '../llm/client.js';
 import { getPageContent } from '../notion/blocks.js';
-import { queryUnprocessedFRs, queryPulseItems, queryIdeaTitles } from '../notion/queries.js';
+import { queryUnprocessedFRs, queryRecentFRs, queryPulseItems, queryIdeaTitles } from '../notion/queries.js';
 import { createAuditPage } from '../notion/mutations.js';
 import type { PipelineConfig, PrepResult } from './types.js';
 import type { Logger } from '../utils/logger.js';
@@ -19,20 +19,32 @@ export async function runPrep(
 ): Promise<PrepResult | null> {
   const { product, frDatabaseId } = config;
 
-  // 1. Query unprocessed FRs
-  logger.info(`Querying unprocessed FRs for product: ${product.product.name}`);
-  const featureRequests = await queryUnprocessedFRs(
-    notionClient,
-    frDatabaseId,
-    product.product.selectValue,
-  );
+  // 1. Query FRs
+  let featureRequests;
+
+  if (config.backtest) {
+    logger.info(`[BACKTEST] Querying last ${config.backtestDays} days of FRs for product: ${product.product.name} (any status)`);
+    featureRequests = await queryRecentFRs(
+      notionClient,
+      frDatabaseId,
+      product.product.selectValue,
+      config.backtestDays,
+    );
+  } else {
+    logger.info(`Querying unprocessed FRs for product: ${product.product.name}`);
+    featureRequests = await queryUnprocessedFRs(
+      notionClient,
+      frDatabaseId,
+      product.product.selectValue,
+    );
+  }
 
   if (featureRequests.length === 0) {
-    logger.info('No unprocessed FRs found');
+    logger.info(config.backtest ? `[BACKTEST] No FRs found in the last ${config.backtestDays} days` : 'No unprocessed FRs found');
     return null;
   }
 
-  logger.info(`Found ${featureRequests.length} unprocessed FRs`);
+  logger.info(`Found ${featureRequests.length} FRs${config.backtest ? ' (backtest mode)' : ''}`);
 
   // 2. Fetch all context in parallel
   logger.info('Fetching product info, pulse data, and idea titles...');

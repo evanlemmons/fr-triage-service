@@ -18,6 +18,16 @@ on:
         required: false
         default: false
         type: boolean
+      backtest:
+        description: 'Backtest: re-process recent FRs regardless of status (implies dry run)'
+        required: false
+        default: false
+        type: boolean
+      backtest_days:
+        description: 'Days to look back in backtest mode'
+        required: false
+        default: '7'
+        type: string
       verbose:
         description: 'Enable verbose logging'
         required: false
@@ -53,6 +63,11 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           VERBOSE: ${{ github.event.inputs.verbose || 'false' }}
+          BACKTEST: ${{ github.event.inputs.backtest || 'false' }}
         run: |
           PRODUCT="${{ github.event.inputs.product || 'home' }}"
-          npx tsx src/index.ts --product "$PRODUCT"
+          ARGS="--product $PRODUCT"
+          if [ "$BACKTEST" = "true" ]; then
+            ARGS="$ARGS --backtest --backtest-days ${{ github.event.inputs.backtest_days || '7' }}"
+          fi
+          npx tsx src/index.ts $ARGS

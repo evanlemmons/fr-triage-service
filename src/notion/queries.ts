@@ -27,14 +27,52 @@ export async function queryUnprocessedFRs(
     },
   });
 
-  return results.map((page: any) => ({
+  return results.map(mapPageToFeatureRequest);
+}
+
+/**
+ * Query recent feature requests for a product regardless of status.
+ * Used in backtest mode to re-process already-triaged FRs for comparison.
+ * Filters: Product == selectValue AND Date >= daysAgo days ago
+ */
+export async function queryRecentFRs(
+  client: NotionClientWrapper,
+  frDatabaseId: string,
+  productSelectValue: string,
+  daysAgo: number = 7,
+): Promise<FeatureRequest[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - daysAgo);
+  const sinceISO = since.toISOString().split('T')[0]; // YYYY-MM-DD
+
+  const results = await client.queryDatabase({
+    database_id: frDatabaseId,
+    filter: {
+      and: [
+        {
+          property: 'Product',
+          select: { equals: productSelectValue },
+        },
+        {
+          property: 'Date',
+          date: { on_or_after: sinceISO },
+        },
+      ],
+    },
+  });
+
+  return results.map(mapPageToFeatureRequest);
+}
+
+function mapPageToFeatureRequest(page: any): FeatureRequest {
+  return {
     id: page.id,
     url: page.url ?? '',
     title: extractTitle(page, 'Feature Request'),
     content: extractRichText(page, 'Description'),
     existingPulseRelationIds: extractRelationIds(page, 'Product Pulse'),
     existingIdeaRelationIds: extractRelationIds(page, 'Ideas Database'),
-  }));
+  };
 }
 
 /**

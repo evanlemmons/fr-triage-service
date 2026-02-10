@@ -10,6 +10,8 @@ async function main() {
     options: {
       product: { type: 'string', short: 'p', default: 'home' },
       'dry-run': { type: 'boolean', default: false },
+      backtest: { type: 'boolean', default: false },
+      'backtest-days': { type: 'string', default: '7' },
       verbose: { type: 'boolean', short: 'v', default: false },
       'list-products': { type: 'boolean', default: false },
     },
@@ -17,8 +19,15 @@ async function main() {
   });
 
   const verbose = values.verbose || process.env.VERBOSE === 'true';
-  const dryRun = values['dry-run'] || process.env.DRY_RUN === 'true';
+  const backtest = values.backtest || process.env.BACKTEST === 'true';
+  const backtestDays = parseInt(values['backtest-days'] ?? '7', 10);
+  // Backtest always implies dry-run — it should never write to Notion
+  const dryRun = backtest || values['dry-run'] || process.env.DRY_RUN === 'true';
   const logger = createLogger(verbose);
+
+  if (backtest) {
+    logger.info(`BACKTEST MODE: Re-processing last ${backtestDays} days of FRs (dry-run enforced)`);
+  }
 
   // List available products and exit
   if (values['list-products']) {
@@ -51,6 +60,8 @@ async function main() {
           frDatabaseId: FR_DATABASE_ID,
           dryRun,
           verbose,
+          backtest,
+          backtestDays,
         },
         logger,
       );

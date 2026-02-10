@@ -8,6 +8,10 @@ export interface PipelineConfig {
   frDatabaseId: string;
   dryRun: boolean;
   verbose: boolean;
+  /** Backtest mode: query recent FRs regardless of status instead of only unprocessed. Implies dryRun. */
+  backtest: boolean;
+  /** Number of days to look back in backtest mode. Default: 7 */
+  backtestDays: number;
 }
 
 export interface PrepResult {
