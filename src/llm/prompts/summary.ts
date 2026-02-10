@@ -18,10 +18,11 @@ Linking rules:
 - For each FR in "Needs Attention", include a clickable link to the FR Notion page if available
 
 "Needs attention" criteria (flag an FR if ANY apply):
+- Product misalignment: Verdict does not match current product OR suggested product is different OR callout indicates FR doesn't belong
 - No Idea matches present OR explicit warning about no ideas
 - No Pulse matches present OR explicit warning about no pulse items
 - Any match (Pulse or Idea) has Low confidence (<70%)
-- Product alignment verdict is "Uncertain" or does not belong OR alignment confidence <70%
+- Product alignment verdict is "Uncertain" OR alignment confidence <70%
 
 Rules:
 - Do not invent data. Use only what appears in the audit content
@@ -37,6 +38,13 @@ OUTPUT FORMAT (must match exactly):
 *Summary*
 • FRs reviewed: X
 • FRs needing attention: X
+• FRs misaligned: X
+
+*Misaligned FRs*
+• <FR_URL|FR: Title> — Suggested: [Product Name]
+• <FR_URL|FR: Title> — Suggested: [Product Name]
+
+(If no FRs are misaligned, omit this section)
 
 *Needs Attention*
 • <FR_URL|FR: Title> — Reason: [brief reason]

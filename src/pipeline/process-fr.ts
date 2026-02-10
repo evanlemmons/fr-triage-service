@@ -11,9 +11,11 @@ import { buildIdeaMatchingPrompt } from '../llm/prompts/idea-matching.js';
 import {
   buildFRHeaderBlocks,
   buildAlignmentAuditBlocks,
+  buildProductMisalignmentCallout,
   buildPulseHeaderBlock,
   buildPulseMatchAuditBlocks,
   buildNoPulseMatchWarning,
+  buildMisalignmentNotice,
   buildIdeaHeaderBlock,
   buildIdeaMatchAuditBlocks,
   buildNoIdeaMatchWarning,
@@ -87,12 +89,20 @@ export async function processFR(
       verdictLower === 'home' || // backward compat with Home-specific prompts
       verdictLower === 'belongs';
 
+    // Write misalignment callout if FR doesn't belong to this product
     if (!result.belongsToProduct) {
-      logger.info(`  FR does not belong to ${config.product.name} (verdict: ${alignment.verdict})`);
-      return result;
+      await notionClient.appendBlockChildren(
+        prepResult.auditPageId,
+        buildProductMisalignmentCallout({
+          currentProduct: config.product.name,
+          suggestedProduct: alignment.suggested_product,
+          verdict: alignment.verdict,
+        }),
+      );
+      logger.warn(`  FR does not belong to ${config.product.name} (verdict: ${alignment.verdict})`);
+    } else {
+      logger.info(`  FR belongs to ${config.product.name} (confidence: ${Math.round(alignment.confidence * 100)}%)`);
     }
-
-    logger.info(`  FR belongs to ${config.product.name} (confidence: ${Math.round(alignment.confidence * 100)}%)`);
 
     // --- Step 2: Pulse Matching ---
     if (config.matching.pulse.enabled && prepResult.pulseData.length > 0) {
@@ -105,6 +115,7 @@ export async function processFR(
         llmClient,
         logger,
         skipFRUpdates,
+        result.belongsToProduct,
       );
     }
 
@@ -119,6 +130,7 @@ export async function processFR(
         llmClient,
         logger,
         skipFRUpdates,
+        result.belongsToProduct,
       );
     }
   } catch (err) {
@@ -141,12 +153,23 @@ async function matchPulses(
   llmClient: LLMClient,
   logger: Logger,
   skipFRUpdates: boolean,
+  belongsToProduct: boolean,
 ): Promise<ValidatedMatch[]> {
   // Write pulse header to audit
   await notionClient.appendBlockChildren(
     prepResult.auditPageId,
     buildPulseHeaderBlock(),
   );
+
+  // If FR doesn't belong to product, write notice and skip matching
+  if (!belongsToProduct) {
+    await notionClient.appendBlockChildren(
+      prepResult.auditPageId,
+      buildMisalignmentNotice(config.product.name),
+    );
+    logger.info(`  Pulse matching skipped (FR misaligned)`);
+    return [];
+  }
 
   // LLM: Match FR to pulses
   const prompt = buildPulseMatchingPrompt({
@@ -233,12 +256,23 @@ async function matchIdeas(
   llmClient: LLMClient,
   logger: Logger,
   skipFRUpdates: boolean,
+  belongsToProduct: boolean,
 ): Promise<ValidatedMatch[]> {
   // Write idea header to audit
   await notionClient.appendBlockChildren(
     prepResult.auditPageId,
     buildIdeaHeaderBlock(),
   );
+
+  // If FR doesn't belong to product, write notice and skip matching
+  if (!belongsToProduct) {
+    await notionClient.appendBlockChildren(
+      prepResult.auditPageId,
+      buildMisalignmentNotice(config.product.name),
+    );
+    logger.info(`  Idea matching skipped (FR misaligned)`);
+    return [];
+  }
 
   // Step 3: Shortlist ideas by title
   const shortlistPrompt = buildIdeaShortlistPrompt({

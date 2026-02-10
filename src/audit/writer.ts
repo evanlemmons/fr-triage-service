@@ -82,6 +82,62 @@ export function buildAlignmentAuditBlocks(result: AlignmentResult): any[] {
 }
 
 /**
+ * Build a generic callout block with configurable content, icon, and color.
+ * This is the foundational function for all callout types.
+ */
+export function buildCalloutBlock(params: {
+  content: string;
+  icon?: string;
+  color?: string;
+}): any {
+  return {
+    object: 'block',
+    type: 'callout',
+    callout: {
+      rich_text: [{
+        type: 'text',
+        text: { content: params.content },
+        annotations: { bold: true }
+      }],
+      icon: { emoji: params.icon ?? '⚠️' },
+      color: params.color ?? 'red_background'
+    }
+  };
+}
+
+/**
+ * Build product misalignment callout.
+ * Used when FR doesn't belong to the current product.
+ */
+export function buildProductMisalignmentCallout(params: {
+  currentProduct: string;
+  suggestedProduct: string;
+  verdict: string;
+}): any[] {
+  const message = `This FR does not belong to ${params.currentProduct}. ` +
+    `Suggested product: ${params.suggestedProduct || 'Unknown'} ` +
+    `(Verdict: ${params.verdict})`;
+
+  return [buildCalloutBlock({
+    content: message,
+    icon: '🚫',
+    color: 'red_background'
+  })];
+}
+
+/**
+ * Build misalignment notice for pulse/idea sections.
+ * Used to explain why matching was skipped.
+ */
+export function buildMisalignmentNotice(productName: string): any[] {
+  return [buildCalloutBlock({
+    content: `Matching skipped because this FR does not belong to ${productName}`,
+    icon: 'ℹ️',
+    color: 'gray_background'
+  })];
+}
+
+/**
  * Build the pulse header block.
  */
 export function buildPulseHeaderBlock(): any[] {
@@ -139,24 +195,14 @@ export function buildPulseMatchAuditBlocks(match: ValidatedMatch): any[] {
 }
 
 /**
- * Build warning block for no pulse matches.
+ * Build warning callout for no pulse matches.
  */
 export function buildNoPulseMatchWarning(): any[] {
-  return [
-    {
-      object: 'block',
-      type: 'paragraph',
-      paragraph: {
-        rich_text: [
-          {
-            type: 'text',
-            text: { content: '⚠️ There are no pulse items matched with this FR! You should probably look into this ' },
-            annotations: { bold: true, color: 'orange' },
-          },
-        ],
-      },
-    },
-  ];
+  return [buildCalloutBlock({
+    content: 'There are no pulse items matched with this FR! You should probably look into this.',
+    icon: '⚠️',
+    color: 'orange_background'
+  })];
 }
 
 /**
@@ -217,24 +263,14 @@ export function buildIdeaMatchAuditBlocks(match: ValidatedMatch): any[] {
 }
 
 /**
- * Build warning block for no idea matches.
+ * Build warning callout for no idea matches.
  */
 export function buildNoIdeaMatchWarning(): any[] {
-  return [
-    {
-      object: 'block',
-      type: 'paragraph',
-      paragraph: {
-        rich_text: [
-          {
-            type: 'text',
-            text: { content: '⚠️ There are no ideas supporting this FR! You should look into this!' },
-            annotations: { bold: true, color: 'orange' },
-          },
-        ],
-      },
-    },
-  ];
+  return [buildCalloutBlock({
+    content: 'There are no ideas supporting this FR! You should look into this!',
+    icon: '⚠️',
+    color: 'orange_background'
+  })];
 }
 
 /**
