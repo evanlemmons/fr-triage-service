@@ -59,7 +59,14 @@ OUTPUT FORMAT (must match exactly):
 • <FR_LINK|FR #N: Title> — tags: [tag1, tag2, ...]
 
 *Notes*
-• Any information that does not fit into the categories above. If there is nothing to say here, do not include this section.`;
+• Any information that does not fit into the categories above. If there is nothing to say here, do not include this section.
+
+OUTPUT RULES:
+- You MUST return valid JSON with a single "summary" field containing the Slack message
+- The summary field should contain the formatted Slack mrkdwn text exactly as specified above
+- Example: {"summary": "*Audit:* <url|New audit page>\\n\\n*Summary*\\n• FRs reviewed: 5\\n..."}
+- Escape all special characters properly for JSON
+- Use \\n for newlines within the JSON string`;
 
 export function buildSummaryPrompt(params: {
   systemPrompt?: string;
