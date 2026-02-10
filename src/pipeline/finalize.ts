@@ -54,6 +54,7 @@ export async function runFinalize(
       productName: config.product.name,
       auditPageUrl: prepResult.auditPageUrl,
       auditContent,
+      frData: results.map(r => ({ title: r.frTitle, url: r.frUrl })),
     });
 
     // For the summary, we just need raw text (not structured JSON)

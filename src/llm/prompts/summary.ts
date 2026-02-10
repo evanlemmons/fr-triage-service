@@ -15,7 +15,9 @@ You MUST:
 
 Linking rules:
 - The output MUST include a clickable link to the audit page using Slack mrkdwn: <URL|text>
-- For each FR in "Needs Attention", include a clickable link to the FR Notion page if available
+- For each FR in "Needs Attention", use the FR URLs provided above to create clickable links
+- Format: <FR_URL|FR: Title> — Reason: [brief reason]
+- IMPORTANT: Always use the URL provided in the "FR URLs" section for the matching FR title
 
 "Needs attention" criteria (flag an FR if ANY apply):
 - Product misalignment: Verdict does not match current product OR suggested product is different OR alignment confidence <70% OR verdict is "Uncertain"
@@ -57,12 +59,16 @@ export function buildSummaryPrompt(params: {
   productName: string;
   auditPageUrl: string;
   auditContent: string;
+  frData: Array<{ title: string; url: string }>;
 }): { system: string; user: string } {
   return {
     system: params.systemPrompt ?? DEFAULT_SUMMARY_SYSTEM_PROMPT,
     user: [
       `Product: ${params.productName}`,
       `Audit Notion page URL: ${params.auditPageUrl}`,
+      ``,
+      `FR URLs (for linking in Slack):`,
+      ...params.frData.map(fr => `- "${fr.title}": ${fr.url}`),
       ``,
       `Full audit page content:`,
       params.auditContent,

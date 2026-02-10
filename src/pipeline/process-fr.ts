@@ -42,6 +42,7 @@ export async function processFR(
   const result: FRProcessingResult = {
     frId: fr.id,
     frTitle: fr.title,
+    frUrl: fr.url,
     alignment: { verdict: 'uncertain', confidence: 0, suggested_product: '', reason: '' },
     belongsToProduct: false,
     pulseMatches: [],

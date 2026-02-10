@@ -36,6 +36,7 @@ export interface ValidatedMatch {
 export interface FRProcessingResult {
   frId: string;
   frTitle: string;
+  frUrl: string;
   alignment: AlignmentResult;
   belongsToProduct: boolean;
   pulseMatches: ValidatedMatch[];

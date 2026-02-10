@@ -90,6 +90,7 @@ export async function runTriage(
       results.push({
         frId: fr.id,
         frTitle: fr.title,
+        frUrl: fr.url,
         alignment: { verdict: 'error', confidence: 0, suggested_product: '', reason: String(err) },
         belongsToProduct: false,
         pulseMatches: [],
