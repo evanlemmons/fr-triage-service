@@ -47,6 +47,7 @@ export const productConfigSchema = z.object({
   }),
   productInfo: z.object({
     pageId: notionIdSchema,
+    description: z.string().min(50).optional(), // Embedded product description (preferred over fetching page content)
   }),
   matching: z.object({
     pulse: pulseConfigSchema,

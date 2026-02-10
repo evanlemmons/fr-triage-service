@@ -53,9 +53,17 @@ export async function runPrep(
   // 2. Fetch all context in parallel
   logger.info('Fetching product info, pulse data, and idea titles...');
 
+  // Use embedded product description if available, otherwise fetch from Notion page
+  const productInfoPromise = product.productInfo.description
+    ? Promise.resolve(product.productInfo.description)
+    : getPageContent(notionClient, product.productInfo.pageId).catch((err) => {
+        // Gracefully handle pages with unsupported block types (e.g., transcription blocks)
+        logger.warn(`Could not fetch product info page content: ${err}. Using empty description.`);
+        return '';
+      });
+
   const [productInfo, pulseData, ideaTitles] = await Promise.all([
-    // Product information page content
-    getPageContent(notionClient, product.productInfo.pageId),
+    productInfoPromise,
 
     // Pulse items (with full page content)
     product.matching.pulse.enabled

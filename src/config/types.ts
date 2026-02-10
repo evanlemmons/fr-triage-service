@@ -6,6 +6,7 @@ export interface ProductConfig {
   };
   productInfo: {
     pageId: string;
+    description?: string; // Embedded product description (preferred over fetching page content)
   };
   matching: {
     pulse: PulseMatchingConfig;
