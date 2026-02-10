@@ -4,7 +4,36 @@ product:
   productPageId: "8f51014d-9759-4e7a-b1e8-b622194cecf3"
 
 productInfo:
-  pageId: "2c4abbce-69a2-80d8-b074-f92596673ec7"
+  pageId: "8f51014d-9759-4e7a-b1e8-b622194cecf3"  # Home product page
+  description: |
+    Planning Center Home is a staff dashboard and task management hub that provides oversight and coordination across all Planning Center products. It serves as the central command center for church staff and ministry leaders by providing:
+
+    **Core Capabilities**:
+    - Customizable dashboards with widgets for cross-product data visualization (read-only aggregation)
+    - Full-featured task management system with task lists, assignments, due dates, and project organization
+    - Planning Center App (PCA) infrastructure: mobile hub with login, push notification settings, dark mode, and app preferences
+    - Cross-product activity feeds and notifications
+    - Team collaboration and staff communication tools
+    - Dashboard sharing and widget configuration
+    - Task templates and recurring task automation
+
+    **Key Surfaces**:
+    - Web application (dashboard management, task lists, widget configuration)
+    - Planning Center App (PCA) - mobile hub infrastructure and native features
+    - PCA dashboards and tasks (native mobile implementations)
+    - Task mobile app (dedicated task management on mobile)
+    - Widget library (data visualization components)
+    - Dashboard templates and sharing
+
+    **Target Users**: Church administrators, executive staff, ministry leaders, team managers who need oversight and coordination across multiple Planning Center products
+
+    **Common Feature Request Themes**: Dashboard customization and layout, new widget types, widget settings and filters, task management features (subtasks, templates, recurring tasks), PCA infrastructure improvements (login, notifications, settings), cross-product data visualization, team collaboration tools, mobile app enhancements
+
+    **Important Boundaries**:
+    - Home provides read-only visualization of data from other products but does NOT modify that data
+    - PCA infrastructure and native features belong to Home; web views accessed through PCA's browser belong to their respective product teams
+    - Task management is fully owned by Home (write operations, assignments, etc.)
+    - Dashboard widgets surface data but do not implement product-specific workflows
 
 matching:
   pulse:
