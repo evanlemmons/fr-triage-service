@@ -170,12 +170,11 @@ function determineAuditStatus(
   });
 
   if (frsNeedingAttention.length > 0) {
-    const frCount = results.length;
     const attentionCount = frsNeedingAttention.length;
 
     return {
       status: 'Needs Attention',
-      notes: `${attentionCount} of ${frCount} FRs need manual review due to misalignment, low confidence, or missing matches.\n\nReview the audit page for details. After addressing issues, you may manually change this status to "Complete".`,
+      notes: `${attentionCount} FRs need manual review. See audit page for details.\n\nAfter addressing issues, manually change this doc's status to "Complete".`,
     };
   }
 
