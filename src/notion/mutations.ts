@@ -1,4 +1,5 @@
 import type { NotionClientWrapper } from './client.js';
+import { formatAuditDate } from '../utils/date.js';
 
 /**
  * Create a new audit page in the AI Feature Request Triage database.
@@ -7,12 +8,14 @@ export async function createAuditPage(
   client: NotionClientWrapper,
   auditDatabaseId: string,
   productPageId: string,
+  productName: string,
   frCount: number,
   batchInfo?: { current: number; total: number },
 ): Promise<{ id: string; url: string }> {
-  // Generate title with batch info if provided
-  const batchLabel = batchInfo ? ` (Batch ${batchInfo.current}/${batchInfo.total})` : '';
-  const titleText = `New FR Audit${batchLabel}`;
+  // Generate title with product name, date, and batch info
+  const dateStr = formatAuditDate();
+  const batchLabel = batchInfo ? ` | ${batchInfo.current} of ${batchInfo.total}` : '';
+  const titleText = `${productName} FR Audit ${dateStr}${batchLabel}`;
 
   const page = await client.createPage({
     parent: { database_id: auditDatabaseId },

@@ -90,6 +90,7 @@ export async function runPrep(
     notionClient,
     product.audit.databaseId,
     product.product.productPageId,
+    product.product.name,
     featureRequests.length,
     config.batchInfo,
   );
