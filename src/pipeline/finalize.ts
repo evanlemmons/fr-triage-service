@@ -117,10 +117,9 @@ async function generateSummaryText(
  * Decision logic:
  * - "Error": Any technical/breaking errors occurred (LLM failures, API errors, etc.)
  * - "Needs Attention": All FRs processed successfully BUT at least one has business issues:
- *   - Product misalignment (verdict doesn't match product OR suggested_product differs OR low confidence <70%)
- *   - No Pulse matches found
- *   - No Idea matches found
- *   - Any match (Pulse or Idea) has low confidence (<70%)
+ *   - Product misalignment (verdict doesn't match product OR uncertain verdict)
+ *   - No Pulse matches found (for FRs that belong to the product)
+ *   - No Idea matches found (for FRs that belong to the product)
  * - "Complete": All FRs processed successfully with no business issues
  */
 function determineAuditStatus(
@@ -142,31 +141,25 @@ function determineAuditStatus(
 
   // Check for business logic issues (FRs needing attention)
   const frsNeedingAttention = results.filter(r => {
-    // Product misalignment checks
-    const verdictLower = r.alignment.verdict.toLowerCase();
-    const productNameLower = productName.toLowerCase();
+    // Product misalignment checks (uses same normalize as process-fr.ts)
+    const normalize = (s: string) => s.toLowerCase().replace(/[-\s]/g, '_');
+    const verdictNormalized = normalize(r.alignment.verdict);
+    const productNameNormalized = normalize(productName);
     const verdictMismatch = !(
-      verdictLower === productNameLower ||
-      verdictLower === 'home' || // backward compat
-      verdictLower === 'belongs'
+      verdictNormalized === productNameNormalized ||
+      verdictNormalized === 'home' || // backward compat
+      verdictNormalized === 'belongs'
     );
-    const suggestedProductDiffers = r.alignment.suggested_product.trim() !== '' &&
-      r.alignment.suggested_product.toLowerCase() !== productNameLower;
-    const lowAlignmentConfidence = r.alignment.confidence < 0.70;
-    const uncertainVerdict = verdictLower === 'uncertain';
+    const uncertainVerdict = verdictNormalized === 'uncertain';
+    const productIssue = verdictMismatch || uncertainVerdict;
 
-    const productIssue = verdictMismatch || suggestedProductDiffers ||
-                        lowAlignmentConfidence || uncertainVerdict;
-
-    // Matching issues
+    // Missing matches for FRs that belong to this product
     const noPulseMatches = r.belongsToProduct && r.pulseMatches.length === 0;
     const noIdeaMatches = r.belongsToProduct && r.ideaMatches.length === 0;
-    const lowConfidenceMatches = [
-      ...r.pulseMatches,
-      ...r.ideaMatches,
-    ].some(m => m.confidence < 0.70);
 
-    return productIssue || noPulseMatches || noIdeaMatches || lowConfidenceMatches;
+    // Note: low confidence is NOT flagged — matches below threshold are
+    // simply excluded, not flagged as needing attention.
+    return productIssue || noPulseMatches || noIdeaMatches;
   });
 
   if (frsNeedingAttention.length > 0) {
