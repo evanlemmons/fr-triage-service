@@ -63,8 +63,26 @@ export class LLMClient {
       });
     }
 
-    // Parse and validate the response
-    const parsed = this.parseJSON(rawText, schemaName);
+    // Parse JSON (with retry on parse failure)
+    let parsed: unknown;
+    try {
+      parsed = this.parseJSON(rawText, schemaName);
+    } catch (parseErr) {
+      // Log what the LLM actually returned so we can debug
+      this.logger.warn(`JSON parse failed for ${schemaName}, retrying`, {
+        responsePreview: rawText.slice(0, 300),
+      });
+
+      try {
+        const retryMessage = `${userMessage}\n\nCRITICAL: Your previous response was not valid JSON. You MUST return ONLY a raw JSON object. No explanation, no markdown, no code fences. Return the JSON object directly.`;
+        const retryText = await this.getRawCompletion(systemPrompt, retryMessage);
+        parsed = this.parseJSON(retryText, schemaName);
+      } catch (retryErr) {
+        throw parseErr; // Throw original error if retry also fails
+      }
+    }
+
+    // Validate against schema
     const result = responseSchema.safeParse(parsed);
 
     if (result.success) {
@@ -98,18 +116,24 @@ export class LLMClient {
 
   private async getRawCompletion(systemPrompt: string, userMessage: string): Promise<string> {
     if (this.provider === 'anthropic' && this.anthropic) {
+      // Prefill assistant response with '{' to force JSON output.
+      // Anthropic continues generation from the prefill, so the response
+      // text won't include the opening brace — we prepend it after.
       const response = await this.anthropic.messages.create({
         model: this.model,
         max_tokens: 4096,
         system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
+        messages: [
+          { role: 'user', content: userMessage },
+          { role: 'assistant', content: '{' },
+        ],
       });
 
       const textBlock = response.content.find((b) => b.type === 'text');
       if (!textBlock || textBlock.type !== 'text') {
         throw new LLMError('No text block in Anthropic response');
       }
-      return textBlock.text;
+      return '{' + textBlock.text;
     }
 
     if (this.provider === 'openai' && this.openai) {
@@ -141,10 +165,10 @@ export class LLMClient {
     try {
       return JSON.parse(jsonStr);
     } catch {
-      throw new LLMError(`Failed to parse LLM response as JSON for ${context}`, {
-        context,
-        responsePreview: jsonStr.slice(0, 200),
-      });
+      throw new LLMError(
+        `Failed to parse LLM response as JSON for ${context}: ${jsonStr.slice(0, 200)}`,
+        { context, responsePreview: jsonStr.slice(0, 500) },
+      );
     }
   }
 }
