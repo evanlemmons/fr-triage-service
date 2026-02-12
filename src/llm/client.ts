@@ -116,18 +116,24 @@ export class LLMClient {
 
   private async getRawCompletion(systemPrompt: string, userMessage: string): Promise<string> {
     if (this.provider === 'anthropic' && this.anthropic) {
+      // Prefill assistant response with '{' to force JSON output.
+      // Anthropic continues generation from the prefill, so the response
+      // text won't include the opening brace — we prepend it after.
       const response = await this.anthropic.messages.create({
         model: this.model,
         max_tokens: 4096,
         system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
+        messages: [
+          { role: 'user', content: userMessage },
+          { role: 'assistant', content: '{' },
+        ],
       });
 
       const textBlock = response.content.find((b) => b.type === 'text');
       if (!textBlock || textBlock.type !== 'text') {
         throw new LLMError('No text block in Anthropic response');
       }
-      return textBlock.text;
+      return '{' + textBlock.text;
     }
 
     if (this.provider === 'openai' && this.openai) {
