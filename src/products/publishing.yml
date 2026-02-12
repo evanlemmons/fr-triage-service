@@ -87,7 +87,7 @@ llm:
 
         Decision heuristic (follow in order):
         1. Ask: Does this FR mention any Publishing domain terms?
-        - Pages, custom pages, page editor, page blocks, drag-and-drop builder, page layout, page styling, page access restrictions, page duplication, page archiving, draft mode, page URL → publishing
+        - Pages, custom pages, page editor, page blocks, drag-and-drop builder, page layout, page styling, page access restrictions, page duplication, page archiving, draft mode, page URL, built-in pages, membership type, page access, countdown, attendance tracking during sermons, sermon donations → publishing
         - Sermons, channels, series, episodes, livestream, live stream, streaming, on-demand video, audio, podcast, RSS feed, Apple Podcasts, Spotify, sermon notes, fill-in-the-blank notes, sermon chat → publishing
         - Theme, template, design, layout, color scheme, colors, branding, navigation, menu, header, footer, Church Center website, CCW, custom domain, domain → publishing
         - CMS, web editor, block editor, widget, component, embed, embedded, QR code, QR, analytics, stats, engagement, page views, multi-campus → publishing

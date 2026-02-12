@@ -94,7 +94,7 @@ llm:
 
         Decision heuristic (follow in order):
         1. Ask: Does this FR mention any Music Stand domain terms?
-        - Sheet music, chord charts, lead sheets, PDFs, music display, annotations, markup, PencilKit, handwriting, highlights, drawings, foot pedal, AirTurn, Bluetooth pedal, USB pedal, page turning, page turn, metronome, click track, tempo, BPM, Ableton Link, audio looping, rehearsal loop, practice loop, playback loop, device linking, linked devices, multi-device sync, external display, HDMI, AirPlay, stage monitor, projection, key transposition, transpose, capo, key change, dark mode for stage, night mode for stage, offline mode for music, Web Music Stand → music_stand
+        - Sheet music, chord charts, lead sheets, PDFs, music display, annotations, markup, PencilKit, handwriting, highlights, drawings, foot pedal, AirTurn, Bluetooth pedal, USB pedal, page turning, page turn, metronome, click track, tempo, BPM, Ableton Link, audio looping, rehearsal loop, practice loop, playback loop, device linking, linked devices, multi-device sync, external display, HDMI, AirPlay, stage monitor, projection, key transposition, transpose, capo, key change, dark mode for stage, night mode for stage, offline mode for music, Web Music Stand, setlist, worship set, zoom, landscape, portrait, page reordering, worship team, band members, offline download → music_stand
         - Volunteer scheduling, team management, plan creation, song library uploads, arrangement editing in Services → not_music_stand
 
         2. Ask: Where would this change be implemented?

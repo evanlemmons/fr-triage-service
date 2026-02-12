@@ -117,7 +117,9 @@ llm:
         - Login, password, password reset, two-step verification, 2FA, MFA, two-factor, SSO, SAML, single sign-on, security, security history, audit trail → accounts
         - Stripe connection, Stripe setup, Checkr, background check, Mailchimp, integration, add-on, external connection → accounts
         - Church Center URL, Church Center activation, mobile app activation, feature toggle, Church Center setup → accounts
-        - Account settings, church name, logo, time zone, date format, language, localization, account cancellation, text messaging setup → accounts
+        - Account settings, church name, logo, time zone, date format, language, localization, account cancellation, account deletion, delete account, close account, text messaging setup, org address, org phone, org email, org contact info → accounts
+        - Product access, user access, product users, what products users have access to, permission levels per product → accounts
+        - Security history, login history, login times, IP addresses, OAuth connections, permission change log → accounts
         - Multi-account, account linking, account switching, data portability, account merge → accounts
         - Donation, donor, fund, batch, pledge, recurring giving, Text2Give, statement → not_accounts (Giving)
         - Member profile, household, custom field, demographic, directory, workflow, People list → not_accounts (People)
@@ -147,10 +149,11 @@ llm:
         4. If the request mentions login management, password reset, two-step verification, 2FA, MFA, SSO, SAML, single sign-on, security settings, or security audit trail, verdict must be "accounts".
         5. If the request mentions enabling, connecting, or disconnecting Stripe, Checkr, or Mailchimp at the account level, verdict must be "accounts". If about how that integration works within a specific product's workflow (e.g., Giving donation processing via Stripe, People background checks via Checkr), verdict must be "not_accounts".
         6. If the request mentions Church Center URL customization, Church Center mobile app activation, or enabling/disabling Church Center features at the org level, verdict must be "accounts". If about Church Center app UX, navigation, or congregant-facing experience, verdict must be "not_accounts".
-        7. If the request mentions account settings, church name, logo, time zone, date format, language preferences, localization, account cancellation, text messaging setup, multi-account linking, account switching, or data portability, verdict must be "accounts".
-        8. Any FR mentioning subscriptions, billing, campuses, org admin roles, billing manager roles, login/security settings, Stripe/Checkr/Mailchimp enablement, Church Center admin configuration, account settings, or localization belongs to Accounts even if other product terminology is also used -- Accounts is the platform admin layer and these are Accounts-owned concepts.
-        9. If the request is clearly about another product's workflow, UI, data model, or product-specific feature (e.g., Services scheduling, Giving donation forms, People member profiles, Home dashboards, Groups management, Calendar resources, Check-Ins stations, Registrations events) and does NOT mention any Accounts domain terms from rule 8, verdict must be "not_accounts".
-        10. If the request could plausibly be implemented either in Accounts or another product and does not mention any Accounts domain terms from rule 8, verdict must be "uncertain".
+        7. If the request mentions account settings, church name, logo, time zone, date format, language preferences, localization, account cancellation, account deletion, delete account, close account, text messaging setup, org address, org phone, org email, org contact info, multi-account linking, account switching, or data portability, verdict must be "accounts".
+        8. If the request mentions product access per user, what products users have access to, permission levels per product, security history, login history, login times, IP addresses, or OAuth connection logs, verdict must be "accounts".
+        9. Any FR mentioning subscriptions, billing, campuses, org admin roles, billing manager roles, login/security settings, Stripe/Checkr/Mailchimp enablement, Church Center admin configuration, account settings, account deletion, security history, product access, or localization belongs to Accounts even if other product terminology is also used -- Accounts is the platform admin layer and these are Accounts-owned concepts.
+        10. If the request is clearly about another product's workflow, UI, data model, or product-specific feature (e.g., Services scheduling, Giving donation forms, People member profiles, Home dashboards, Groups management, Calendar resources, Check-Ins stations, Registrations events) and does NOT mention any Accounts domain terms from rule 9, verdict must be "not_accounts".
+        11. If the request could plausibly be implemented either in Accounts or another product and does not mention any Accounts domain terms from rule 9, verdict must be "uncertain".
 
         Output rules:
         - Use only the product context and feature request content provided.

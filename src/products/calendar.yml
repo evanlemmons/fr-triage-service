@@ -100,7 +100,7 @@ llm:
 
         Decision heuristic (follow in order):
         1. Ask: Does this FR mention any Calendar domain terms?
-        - Events, scheduling, recurring, recurrence, repeating, series, all-day, event template, duplicate event, bulk edit, block out, calendar view, multiple calendars, event owner, rooms, room setups, room capacity, resources, equipment, facilities, folders, booking, reservation, conflict detection, double-booking, overlap, approval groups, approval workflow, event request forms, tags, campus tags, required tag groups, iCal, calendar feed, calendar sync, calendar embed, kiosk mode, kiosk display, Church Center event publishing, Published/Featured events, connections, feeds from Groups/Registrations, keyboard shortcuts → calendar
+        - Events, scheduling, recurring, recurrence, repeating, series, all-day, event template, duplicate event, bulk edit, block out, calendar view, multiple calendars, event owner, rooms, room setups, room capacity, resources, equipment, facilities, folders, booking, reservation, conflict detection, double-booking, overlap, approval groups, approval workflow, event request forms, tags, campus tags, required tag groups, iCal, calendar feed, calendar sync, calendar embed, kiosk mode, kiosk display, Church Center event publishing, Published/Featured events, connections, feeds from Groups/Registrations, keyboard shortcuts, event templates, event owners, hide events, all-day events → calendar
         - Registration, signup, tickets, payments, waitlist, attendee management, capacity limits → not_calendar
 
         2. Ask: Where would this change be implemented?

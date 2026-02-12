@@ -111,7 +111,7 @@ llm:
 
         Decision heuristic (follow in order):
         1. Ask: Does this FR mention any Church Center infrastructure terms?
-        - Login, sign in, sign-in, passwordless, authentication, verification code, session, guest access, under-13 login restriction -> church_center
+        - Login, sign in, sign-in, passwordless, authentication, verification code, session, guest access, under-13 login restriction, under-13 restrictions, under 13, session management, directory sharing preferences -> church_center
         - Navigation, tab bar, bottom nav, sidebar, menu, in-app routing, deep link, universal link, URL scheme -> church_center
         - Push notification, notification delivery, notification preferences, badge count, notification permission -> church_center
         - Onboarding, first launch, church discovery, find a church, setup flow, getting started -> church_center

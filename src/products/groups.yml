@@ -99,7 +99,7 @@ llm:
 
         Decision heuristic (follow in order):
         1. Ask: Does this FR mention any Groups domain terms?
-        - Groups, small groups, life groups, community groups, Sunday School classes, recovery groups, group types, tags, children groups, sub-groups, confidential groups, membership, enrollment, open signup, request-based enrollment, member limits, group leaders, facilitators, hosts, group coordinators, seasons, RSVP, group events, group attendance, resources, curriculum, study materials, shared resources, group automations, auto-actions, Church Center group discovery, group directory, map view, group signup → groups
+        - Groups, small groups, life groups, community groups, Sunday School classes, recovery groups, group types, tags, children groups, sub-groups, confidential groups, membership, enrollment, open signup, request-based enrollment, member limits, group leaders, facilitators, hosts, group coordinators, seasons, RSVP, group events, group attendance, resources, curriculum, study materials, shared resources, group automations, auto-actions, Church Center group discovery, group directory, map view, group signup, Sunday School, CSV import, CSV export, drop-off rates, open enrollment, closed enrollment, group health → groups
         - Chat messages, direct messaging, message threading, message notifications → not_groups (Chat product)
         - Member profiles, contact info, custom fields, household data, People lists → not_groups (People product)
         - Facility booking, room scheduling, resource reservation → not_groups (Calendar product)
