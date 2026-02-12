@@ -16,7 +16,7 @@ const pulseConfigSchema = z.object({
     statusNotEquals: z.string(),
   }),
   fetchContent: z.boolean().default(true),
-  confidenceThreshold: z.number().min(0).max(1).default(0.75),
+  confidenceThreshold: z.number().min(0).max(1).default(0.80),
 });
 
 const ideasConfigSchema = z.object({
@@ -27,7 +27,7 @@ const ideasConfigSchema = z.object({
   }),
   twoPhaseMatching: z.boolean().default(true),
   shortlistMax: z.number().int().min(1).max(50).default(20),
-  confidenceThreshold: z.number().min(0).max(1).default(0.75),
+  confidenceThreshold: z.number().min(0).max(1).default(0.80),
 });
 
 const slackConfigSchema = z.object({

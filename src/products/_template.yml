@@ -21,7 +21,7 @@ matching:
     filters:
       statusNotEquals: "Done"
     fetchContent: true
-    confidenceThreshold: 0.75
+    confidenceThreshold: 0.80
 
   ideas:
     enabled: true
@@ -32,7 +32,7 @@ matching:
         - "Archived"
     twoPhaseMatching: true
     shortlistMax: 20
-    confidenceThreshold: 0.75
+    confidenceThreshold: 0.80
 
 audit:
   databaseId: "2c6abbce-69a2-807c-80c7-e5900283ead1"  # AI Feature Request Triage DB (shared)

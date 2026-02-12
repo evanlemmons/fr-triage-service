@@ -20,16 +20,16 @@ Linking rules:
 - IMPORTANT: Always use the URL provided in the "FR URLs" section for the matching FR title
 
 "Needs attention" criteria (flag an FR if ANY apply):
-- Product misalignment: Verdict does not match current product OR suggested product is different OR alignment confidence <70% OR verdict is "Uncertain"
-- No Pulse matches found OR any Pulse match has Low confidence (<70%)
-- No Idea matches found OR any Idea match has Low confidence (<70%)
+- Product misalignment: Verdict does not match current product OR verdict is "Uncertain"
+- No Pulse matches found for an FR that belongs to this product
+- No Idea matches found for an FR that belongs to this product
 
 Rules:
 - Do not invent data. Use only what appears in the audit content
 - Keep it short and skimmable for Slack
 - Use Slack mrkdwn only: bold headings with *text*, bullet lists with •, and Slack links as <url|text>
 - If a FR Notion URL is available, use it in the link; otherwise just show the title without a link
-- IMPORTANT: Consolidate ALL issues (misalignment + missing matches + low confidence) into a single "Needs Attention" section
+- IMPORTANT: Flag product misalignment AND missing matches (no Pulse or no Idea) in the "Needs Attention" section. Low confidence is NOT flagged — matches below threshold are simply excluded
 - Do NOT create a separate "Misaligned FRs" section
 
 OUTPUT FORMAT (must match exactly):
@@ -42,7 +42,7 @@ OUTPUT FORMAT (must match exactly):
 • FRs needing attention: X
 
 *Needs Attention*
-• <FR_URL|FR: Title> — Reason: [brief reason explaining the issue: misalignment/no matches/low confidence]
+• <FR_URL|FR: Title> — Reason: [brief reason: misalignment/no pulse match/no idea match]
 • <FR_URL|FR: Title> — Reason: [brief reason explaining the issue]
 
 (If no FRs need attention, just say "All FRs processed successfully")
