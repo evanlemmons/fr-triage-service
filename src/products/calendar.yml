@@ -73,41 +73,56 @@ llm:
 
         Your task is to determine whether the primary implementation surface for the requested change would be Calendar (event scheduling, recurring events, facility/room/resource management, approval workflows, event request forms, calendar feeds, calendar views, kiosk mode) or another Planning Center product.
 
-        Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference events, rooms, or scheduling in the context of another product's workflow.
+        Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference data from another Planning Center product that interacts with Calendar.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Calendar encompasses: (1) event scheduling and management, (2) facility and resource booking with conflict detection, (3) approval workflows for rooms, resources, and event requests, (4) event request forms, (5) calendar sharing via iCal feeds and Church Center publishing, and (6) cross-product connections and feeds configuration.
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Calendar encompasses event scheduling, recurring events, rooms, room setups, resources, equipment, facilities, folders, approval groups, approval workflows, event request forms, tags, campus tags, required tag groups, multiple calendars, calendar views, event templates, bulk editing, block-out events, event owners, iCal feeds, iCal imports, calendar sync, calendar embed, kiosk mode, Church Center event publishing, connections to other products, feeds from Groups and Registrations, conflict detection, and double-booking prevention. ANY feature request that mentions these concepts likely belongs to Calendar unless it is explicitly about registration/signup management, worship service planning, or attendance tracking unrelated to event scheduling.
 
         Calendar vs Registrations boundary (most commonly confused):
-        - Calendar = scheduling an event (when, where, what rooms/resources)
-        - Registrations = managing who attends an event (signups, tickets, payments, capacity limits, waitlists, registration forms)
-        - If the request is about CREATING or SCHEDULING an event, setting up rooms, or managing recurring dates → calendar
-        - If the request is about SIGNING UP for an event, collecting attendee info, payments, tickets, or registration capacity → not_calendar (likely Registrations)
-        - Feeds from Registrations into Calendar are configured on the Calendar side, but the registration/signup functionality itself belongs to Registrations
+        - Calendar IS responsible for: scheduling events (when/where), creating and editing events, recurring event patterns, event templates, duplicating events, bulk editing events, all-day events, block-out events, rooms, room setups, room capacity, resources, equipment, folders, conflict detection, double-booking prevention, approval groups for rooms/resources/events, event request forms, tags, campus tags, filtered calendar views, iCal feeds, calendar sync, calendar embed, kiosk mode, Church Center event publishing (Published/Featured), connections to other products, feeds from Groups and Registrations, multiple calendars, event owners, keyboard shortcuts, and reporting on events/rooms/resources
+        - Registrations IS responsible for: event signups, registration forms, tickets, payments for events, capacity limits, waitlists, attendee management, registration pricing, promo codes, and all "who is coming / who paid" functionality
+        - Key distinction: If the request is about CREATING, SCHEDULING, or MANAGING an event (dates, times, locations, rooms, resources, recurrence) → calendar. If it is about SIGNING UP for an event, collecting attendee information, payments, tickets, or managing registration capacity → not_calendar.
+        - When in doubt: if the FR mentions "event," "room," "resource," "schedule," "recurring," "booking," "approval," "iCal," "feed," or "calendar" in any form, lean toward calendar.
+
+        Calendar vs Groups boundary:
+        - Calendar IS responsible for: event scheduling, facility booking for any event including group events, feeds from Groups into Calendar (one-way sync), connections linking individual events to groups
+        - Groups IS responsible for: group membership, group types, group community features, group leader tools, group meeting content, group directories, group-specific enrollment
+        - Key distinction: If the request is about SCHEDULING or BOOKING SPACE for a group event → calendar. If it is about GROUP MEMBERSHIP, GROUP COMMUNITY, or GROUP-SPECIFIC FEATURES → not_calendar.
+
+        Calendar vs Services boundary:
+        - Calendar IS responsible for: general event scheduling, connections linking events to service plans, facility booking for worship services (rooms, resources, setup)
+        - Services IS responsible for: worship service planning, service types, service plans, team scheduling for services, rehearsals, song management, orders of service, volunteer positions, service-specific teams
+        - Key distinction: If the request is about WHEN/WHERE a service happens or the ROOM/RESOURCE setup → calendar. If it is about the WORSHIP PLAN CONTENT, TEAM ASSIGNMENTS, SONGS, or ORDER OF SERVICE → not_calendar.
+
+        Calendar vs Check-Ins boundary:
+        - Calendar IS responsible for: event scheduling, connections linking events to Check-Ins events, kiosk MODE (displaying calendar/events on a screen)
+        - Check-Ins IS responsible for: attendance tracking, check-in stations, check-in kiosks (for scanning/checking people in), security labels, headcounts, roster management, child safety features
+        - Key distinction: Calendar's "kiosk mode" DISPLAYS events on a screen. Check-Ins' "kiosk" CHECKS PEOPLE IN at an event. If the request is about a DISPLAY SCREEN showing events → calendar. If the request is about SCANNING, CHECKING IN, LABELS, or ATTENDANCE TRACKING → not_calendar.
 
         Decision heuristic (follow in order):
-        1. Ask: Is this about event scheduling, recurring events, or calendar views?
-        - Creating, editing, duplicating events, event templates, bulk editing, calendar views → calendar
-        - Signing up for events, registration forms, tickets, payments, waitlists → not_calendar
+        1. Ask: Does this FR mention any Calendar domain terms?
+        - Events, scheduling, recurring, recurrence, repeating, series, all-day, event template, duplicate event, bulk edit, block out, calendar view, multiple calendars, event owner, rooms, room setups, room capacity, resources, equipment, facilities, folders, booking, reservation, conflict detection, double-booking, overlap, approval groups, approval workflow, event request forms, tags, campus tags, required tag groups, iCal, calendar feed, calendar sync, calendar embed, kiosk mode, kiosk display, Church Center event publishing, Published/Featured events, connections, feeds from Groups/Registrations, keyboard shortcuts → calendar
+        - Registration, signup, tickets, payments, waitlist, attendee management, capacity limits → not_calendar
 
-        2. Ask: Is this about facility/room/resource management?
-        - Rooms, room setups, resources, equipment, capacity, conflict detection, double-booking prevention, folders → calendar
-        - Check-in stations, kiosks for attendance tracking, labels → not_calendar (likely Check-Ins)
+        2. Ask: Where would this change be implemented?
+        - Calendar admin app, Church Center event display, Calendar reports, room/resource management interface, approval workflow interface, event request form builder, tag management, feed/connection configuration, kiosk mode display → lean calendar
+        - Another product's UI, settings, workflows, or data model → lean not_calendar
 
-        3. Ask: Is this about approval workflows or event request forms?
-        - Approval groups, room/resource/event approvals, public event request forms, approval notifications → calendar
-        - Volunteer scheduling approvals, service team confirmations → not_calendar (likely Services)
+        3. Ask: Is this about how EVENTS or FACILITIES are managed, or about PEOPLE ATTENDING events?
+        - Event creation, event editing, room/resource booking, approval workflows, calendar views, event request submission, event publishing, calendar feeds → calendar (even if "registration" or "check-in" language is peripherally used)
+        - Signing up, paying, checking in, tracking attendance, managing registrants → not_calendar
 
-        4. Ask: Is this about calendar sharing, feeds, or publishing?
-        - iCal feeds, calendar sync, calendar embed, kiosk display mode, Church Center event publishing/display → calendar
-        - Church Center page layout, website content management → not_calendar (likely Publishing)
+        4. Ask: Is the request about the calendar/scheduling experience or about a platform/infrastructure concern?
+        - Event scheduling UX, calendar views, room booking workflow, approval notifications, iCal feed configuration, kiosk display setup → calendar
+        - Church Center platform features, Publishing settings, account/org billing → not_calendar or uncertain
 
         Hard rules:
-        1. If the request is about scheduling events, recurring event patterns, event templates, calendar views, or multi-calendar management, verdict must be "calendar" even if another product's events are mentioned.
-        2. If the request is about room booking, resource reservation, facility management, room setups, conflict detection, or approval workflows for rooms/resources/events, verdict must be "calendar".
-        3. If the request is about event registration, signups, tickets, payments, attendee management, waitlists, or registration capacity, verdict must be "not_calendar" -- this belongs to Registrations.
-        4. If the request is about worship service planning, service types, service plans, team scheduling, rehearsals, song management, or orders of service, verdict must be "not_calendar" -- this belongs to Services.
-        5. If the request is about attendance tracking at events, check-in kiosks, check-in stations, security labels, or headcounts, verdict must be "not_calendar" -- this belongs to Check-Ins.
-        6. If the request could plausibly be implemented either in Calendar or another product and does not explicitly mention event scheduling, rooms, resources, approvals, request forms, or calendar feeds, verdict must be "uncertain".
+        1. If the request mentions events, rooms, resources, scheduling, booking, recurring, approval, iCal, calendar feeds, event request forms, room setups, conflict detection, kiosk mode/display, tags, campus tags, multiple calendars, event templates, or connections/feeds in the context of event planning and facility management, verdict must be "calendar" even if other product terminology is also used.
+        2. If the request is about room booking, resource reservation, facility management, room setups, folders, equipment, conflict detection, double-booking prevention, or approval workflows for rooms/resources/events, verdict must be "calendar" -- these are Calendar-owned concepts.
+        3. If the request is about event REGISTRATION, signups, tickets, payments, attendee management, waitlists, registration capacity, or registration pricing, verdict must be "not_calendar" -- Registrations handles event payments and signups; Calendar handles event scheduling.
+        4. If the request is about worship service planning, service types, service plans, team scheduling for services, rehearsals, song management, or orders of service, verdict must be "not_calendar" -- this belongs to Services.
+        5. If the request is about attendance tracking at events, check-in kiosks (for scanning people), check-in stations, security labels, or headcounts, verdict must be "not_calendar" -- this belongs to Check-Ins.
+        6. If the request is about calendar features surfaced IN Church Center (browsing published events, bookmarking events, submitting event requests, viewing event details, syncing events to personal calendars), verdict must be "calendar" -- Calendar owns these features even though they appear in Church Center.
+        7. If the request could plausibly be implemented either in Calendar or another product and does not mention any Calendar domain terms (events, rooms, resources, scheduling, booking, recurring, approval, iCal, feeds, tags, kiosk mode, event request forms, connections), verdict must be "uncertain".
 
         Output rules:
         - Use only the product context and feature request content provided.

@@ -80,45 +80,77 @@ llm:
 
         Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference data from another Planning Center product that is administered through Accounts.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Accounts is the PLATFORM ADMIN layer responsible for: (1) organization settings, subscription, and billing management, (2) campus management, (3) organization roles and permissions, (4) security (login, 2FA, audit trail), (5) third-party integrations (Stripe, Checkr, Mailchimp), and (6) Church Center admin-level configuration (enabling/disabling features, URL customization).
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Accounts is the PLATFORM ADMIN layer responsible for: (1) organization settings, subscription, and billing management, (2) campus management, (3) organization roles and permissions, (4) security (login, 2FA, audit trail), (5) third-party integrations (Stripe, Checkr, Mailchimp), and (6) Church Center admin-level configuration (enabling/disabling features, URL customization). ANY feature request that mentions subscriptions, billing, invoices, receipts, plan changes, pricing, campuses, multi-campus, multi-site, church plant, org admin, organization administrator, billing manager, org roles, permissions, security, two-step verification, 2FA, MFA, SSO, SAML, login management, password reset, Stripe connection, Checkr, background check, Mailchimp, Church Center URL, Church Center activation, mobile app activation, account settings, time zone, date format, localization, account cancellation, or text messaging setup likely belongs to Accounts unless it is explicitly about a product-specific workflow unrelated to platform administration.
 
-        Key boundary clarifications:
-        - Accounts vs People: Accounts owns org-level admin settings, staff permissions, and login management. People owns member profiles, member data, lists, workflows, and member-facing features.
-        - Accounts vs Giving: Accounts owns Stripe account connection setup and product billing/subscriptions. Giving owns donation processing, donor management, fund configuration, and giving workflows.
-        - Accounts vs Church Center: Accounts owns the admin toggle for enabling/disabling Church Center features and URL customization. The Church Center team owns the app UX, navigation, and user-facing experience.
-        - Accounts vs Home: Accounts owns org-level settings that affect all products. Home owns the staff dashboard, widgets, and task management.
-        - Accounts vs all products: Accounts manages cross-product settings like permissions, campus setup, and integrations. Product-specific features (Services scheduling, Groups management, Calendar resources, etc.) belong to their respective products.
+        Accounts vs People boundary (critical -- many FRs touch both):
+        - Accounts IS responsible for: organization administrator roles, billing manager roles, staff-level permissions and access control, login management (helping people log in, password resets, changing login methods), two-step verification enforcement, security audit trail, account-wide settings (church name, logo, time zone, date format, language), and cross-product permission management
+        - People IS responsible for: member profiles, contact information, household structure, custom fields, demographic data, member directories, workflows, People lists, membership management, and non-admin user data
+        - Key distinction: If the request is about WHO CAN ACCESS or ADMINISTER the platform, org-level roles, or login/security settings → accounts. If it is about MEMBER DATA, profile fields, or people management features → not_accounts.
+        - When in doubt: if the FR mentions "admin," "administrator," "org admin," "permissions," "roles," "login," "security," "two-step," or "2FA" in any form, lean toward accounts.
+
+        Accounts vs Giving boundary (critical -- billing vs donations):
+        - Accounts IS responsible for: Stripe account connection setup and management, product subscription billing (subscribing/unsubscribing to PC products), payment method management for org billing, invoices and receipts for PC subscriptions, and enabling Stripe at the account level
+        - Giving IS responsible for: donation processing, donor management, fund configuration, giving workflows, recurring donations, Text2Give, year-end statements, batch entry, and all donation-related Stripe transactions
+        - Key distinction: If the request is about PAYING FOR Planning Center (subscription billing, plan changes, invoices) or CONNECTING Stripe at the org level → accounts. If it is about RECEIVING DONATIONS from church members → not_accounts (Giving).
+        - When in doubt: if the FR mentions "subscription," "billing," "plan," "upgrade," "downgrade," "invoice," or "receipt" in the context of the church's PC account, lean toward accounts.
+
+        Accounts vs Church Center boundary:
+        - Accounts IS responsible for: Church Center URL customization (subdomain), mobile app activation toggle, enabling/disabling Church Center features at the org level, campus search visibility toggles
+        - Church Center IS responsible for: app UX, navigation, user-facing experience, congregant-facing features, Church Center design and layout
+        - Key distinction: If the request is about an ADMIN TOGGLE or CONFIGURATION for Church Center at the org level → accounts. If it is about the CONGREGANT EXPERIENCE within Church Center → not_accounts.
+
+        Accounts vs Home boundary:
+        - Accounts IS responsible for: org-level settings that affect all products, account-wide configuration
+        - Home IS responsible for: staff dashboard, widgets, task management, notifications feed
+        - Key distinction: If the request is about ORGANIZATION SETTINGS or PLATFORM CONFIGURATION → accounts. If it is about the STAFF DASHBOARD or TASK MANAGEMENT → not_accounts.
+
+        Accounts vs all other products boundary:
+        - Accounts IS responsible for: cross-product settings (permissions, campus setup, integrations), account-level text messaging setup, multi-campus vs multi-account decisions, account creator privileges, data portability requests (CSV/iCal import undo)
+        - Individual products ARE responsible for: product-specific features (Services scheduling, Groups management, Calendar resources, Check-Ins stations, Registrations events, Publishing navigation)
+        - Key distinction: If the request is about a CROSS-PRODUCT SETTING administered in Accounts → accounts. If it is about a PRODUCT-SPECIFIC FEATURE or WORKFLOW → not_accounts.
 
         Decision heuristic (follow in order):
-        1. Ask: Is this about organization-level administration, billing, or subscription management?
-        - Managing subscriptions, upgrading/downgrading plans, payment methods, invoices, receipts -> accounts
-        - Account setup, church name/logo/time zone, localization settings -> accounts
-        - Account cancellation or account-level data requests -> accounts
+        1. Ask: Does this FR mention any Accounts domain terms?
+        - Subscription, billing, invoice, receipt, plan change, upgrade, downgrade, seasonal plan, pricing, payment method, credit card, billing address, sales tax → accounts
+        - Organization administrator, org admin, billing manager, org roles, staff permissions, access control, permission management → accounts
+        - Campus, campuses, multi-campus, multi-site, church plant, campus management, campus configuration, campus address, campus visibility → accounts
+        - Login, password, password reset, two-step verification, 2FA, MFA, two-factor, SSO, SAML, single sign-on, security, security history, audit trail → accounts
+        - Stripe connection, Stripe setup, Checkr, background check, Mailchimp, integration, add-on, external connection → accounts
+        - Church Center URL, Church Center activation, mobile app activation, feature toggle, Church Center setup → accounts
+        - Account settings, church name, logo, time zone, date format, language, localization, account cancellation, text messaging setup → accounts
+        - Multi-account, account linking, account switching, data portability, account merge → accounts
+        - Donation, donor, fund, batch, pledge, recurring giving, Text2Give, statement → not_accounts (Giving)
+        - Member profile, household, custom field, demographic, directory, workflow, People list → not_accounts (People)
+        - Event registration, ticket, merchandise → not_accounts (Registrations)
+        - Service scheduling, song, arrangement, team position → not_accounts (Services)
+        - Dashboard, widget, task → not_accounts (Home)
 
-        2. Ask: Is this about campus management, permissions, or security?
-        - Adding/configuring campuses, multi-campus settings, church plant transitions -> accounts
-        - Organization admin roles, billing manager roles, staff permissions -> accounts
-        - Login management, two-step verification, SSO, security audit trail -> accounts
-        - Product-specific permissions within a product (e.g., Services team permissions) -> not_accounts
+        2. Ask: Where would this change be implemented?
+        - Accounts web application (org settings, billing, campus management, security, integrations) → lean accounts
+        - Church Center admin configuration (URL, feature toggles, mobile app activation) → lean accounts
+        - Integration management pages (Stripe, Checkr, Mailchimp connections) → lean accounts
+        - User/role management interface (org admins, billing managers) → lean accounts
+        - Another product's UI, settings, workflows, or data model → lean not_accounts
 
-        3. Ask: Is this about a third-party integration or Church Center admin configuration?
-        - Stripe connection setup, Checkr enablement, Mailchimp enablement -> accounts
-        - Church Center feature toggling, URL customization, mobile app activation -> accounts
-        - How a specific integration works WITHIN another product (e.g., Giving donation processing via Stripe) -> not_accounts
-        - Church Center app UX, navigation, user-facing features -> not_accounts
+        3. Ask: Is this about platform administration or product-specific functionality?
+        - Managing who can access the platform, what products are subscribed, how campuses are configured, how security is enforced → accounts
+        - Using a specific product's features (scheduling services, processing donations, managing members, running registrations) → not_accounts
 
-        4. Ask: Is this about a product-specific feature or workflow?
-        - Scheduling in Services, donation workflows in Giving, member profiles in People -> not_accounts
-        - Dashboard widgets in Home, group management in Groups, event registration -> not_accounts
-        - If the request is about how a cross-product setting (campus, permissions) affects a specific product -> accounts
+        4. Ask: Is the request about a cross-product setting or an individual product's workflow?
+        - Campus setup that flows into all products, permission changes that affect multiple products, integration enablement → accounts
+        - How a campus is used within a specific product, product-specific permission UI → not_accounts or uncertain
 
         Hard rules:
-        1. If the request is about subscription management, billing, payment methods, invoices, plan changes, or pricing, verdict must be "accounts".
-        2. If the request is about organization admin roles, billing manager roles, staff-level permissions, login management, two-step verification, SSO/SAML, or security settings, verdict must be "accounts".
-        3. If the request is about campus management (adding, configuring, multi-campus setup, church plants), verdict must be "accounts".
-        4. If the request is about enabling/disabling third-party integrations (Stripe, Checkr, Mailchimp) at the account level, verdict must be "accounts". If about how that integration works within a specific product's workflow, verdict must be "not_accounts".
-        5. If the request is clearly about another product's workflow, UI, data model, or product-specific feature (e.g., Services scheduling, Giving donation forms, People member profiles, Home dashboards), verdict must be "not_accounts".
-        6. If the request could plausibly be implemented either in Accounts or another product and does not explicitly mention org admin settings, billing, campuses, permissions, security, or integrations, verdict must be "uncertain".
+        1. If the request mentions subscriptions, billing, payment methods, invoices, receipts, plan changes, pricing, upgrade, downgrade, or seasonal plan in the context of the church's PC account, verdict must be "accounts".
+        2. If the request mentions organization admin, org admin, billing manager, org roles, staff-level permissions, access control, or permission management at the platform level, verdict must be "accounts".
+        3. If the request mentions campus management, multi-campus, multi-site, church plant, campus configuration, campus address, or campus visibility, verdict must be "accounts".
+        4. If the request mentions login management, password reset, two-step verification, 2FA, MFA, SSO, SAML, single sign-on, security settings, or security audit trail, verdict must be "accounts".
+        5. If the request mentions enabling, connecting, or disconnecting Stripe, Checkr, or Mailchimp at the account level, verdict must be "accounts". If about how that integration works within a specific product's workflow (e.g., Giving donation processing via Stripe, People background checks via Checkr), verdict must be "not_accounts".
+        6. If the request mentions Church Center URL customization, Church Center mobile app activation, or enabling/disabling Church Center features at the org level, verdict must be "accounts". If about Church Center app UX, navigation, or congregant-facing experience, verdict must be "not_accounts".
+        7. If the request mentions account settings, church name, logo, time zone, date format, language preferences, localization, account cancellation, text messaging setup, multi-account linking, account switching, or data portability, verdict must be "accounts".
+        8. Any FR mentioning subscriptions, billing, campuses, org admin roles, billing manager roles, login/security settings, Stripe/Checkr/Mailchimp enablement, Church Center admin configuration, account settings, or localization belongs to Accounts even if other product terminology is also used -- Accounts is the platform admin layer and these are Accounts-owned concepts.
+        9. If the request is clearly about another product's workflow, UI, data model, or product-specific feature (e.g., Services scheduling, Giving donation forms, People member profiles, Home dashboards, Groups management, Calendar resources, Check-Ins stations, Registrations events) and does NOT mention any Accounts domain terms from rule 8, verdict must be "not_accounts".
+        10. If the request could plausibly be implemented either in Accounts or another product and does not mention any Accounts domain terms from rule 8, verdict must be "uncertain".
 
         Output rules:
         - Use only the product context and feature request content provided.

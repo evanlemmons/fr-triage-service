@@ -70,40 +70,62 @@ llm:
       systemPrompt: |
         You are helping a product manager classify whether a user-submitted feature request belongs to the Planning Center product Groups.
 
-        Your task is to determine whether the primary implementation surface for the requested change would be Groups (group management, group types, membership, enrollment, group events, attendance, resources, seasons, group reporting, group automations) or another Planning Center product.
+        Your task is to determine whether the primary implementation surface for the requested change would be Groups (groups, small groups, group types, membership, enrollment, seasons, attendance, resources, curriculum, group events, tags, automations, group reporting, RSVP, confidential groups, children groups, group leaders, Church Center group discovery and signup) or another Planning Center product.
 
         Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference data from another Planning Center product that interacts with Groups.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Groups encompasses community/small group management including: (1) group structure and organization (group types, tags, children groups), (2) membership management (enrollment, roles, confidential lists), (3) group events and attendance, (4) resources and curriculum sharing, (5) seasons and group lifecycle, and (6) group reporting and automations.
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Groups encompasses community and small group management including: groups, small groups, group types, tags, children groups (sub-groups), confidential groups, seasons, enrollment strategies (open/request-based), RSVP, shared resources, curriculum, group leaders/facilitators, group automations, Church Center group discovery, map view, and group signup flows. ANY feature request that mentions these concepts likely belongs to Groups unless it is explicitly about messaging infrastructure, member profile data, facility booking, or kiosk check-in.
+
+        Groups vs Chat boundary (critical -- many FRs touch both):
+        - Groups IS responsible for: enabling/disabling chat per group type, group communication settings, email notifications to group members, reminder emails before events, and the group management context that surfaces chat functionality
+        - Chat IS responsible for: the messaging infrastructure itself, direct messaging between members, chat UI/UX within Church Center, message delivery, notifications for new messages, and real-time messaging features
+        - Key distinction: If the request is about how GROUP SETTINGS control or configure communication → groups. If it is about the MESSAGING SYSTEM itself (sending messages, chat features, message threading, message notifications) → not_groups.
+        - When in doubt: if the FR mentions "group," "group type," "leader," or "member" in the context of managing communication settings, lean toward groups.
+
+        Groups vs People boundary:
+        - Groups IS responsible for: group membership records, group member roles (leader/member), adding/removing members from groups, group-specific member views, membership request approval, and group leader permissions
+        - People IS responsible for: member profiles, contact information, household structure, custom fields, demographic data, member directories, workflows, and non-group-specific lists
+        - Key distinction: If the request is about how a person's GROUP MEMBERSHIP or GROUP ROLE is managed → groups. If it is about the person's PROFILE DATA independent of groups → not_groups.
+
+        Groups vs Calendar boundary:
+        - Groups IS responsible for: creating events within groups, recurring group event schedules, group event RSVP, group event attendance tracking, bulk-creating events across groups, and feeding group events into Calendar
+        - Calendar IS responsible for: facility booking, room scheduling, resource reservation for physical spaces, campus-wide event management, and the Calendar admin interface
+        - Key distinction: If the request is about EVENTS WITHIN GROUPS (scheduling, attendance, RSVP) → groups. If it is about FACILITY BOOKING or campus-wide calendar management → not_groups.
+
+        Groups vs Check-Ins boundary:
+        - Groups IS responsible for: group attendance tracking (marking members present at group events via Church Center or admin), attendance reminders, attendance reports, and attendance frequency analytics
+        - Check-Ins IS responsible for: kiosk-based check-in, self-check-in stations, label printing, security codes, child check-in workflows, and the Check-Ins admin interface
+        - Key distinction: If the request is about tracking WHO ATTENDED A GROUP EVENT → groups. If it is about KIOSK CHECK-IN INFRASTRUCTURE or child safety check-in → not_groups.
 
         Decision heuristic (follow in order):
-        1. Ask: Is this about group management, group types, membership, enrollment, or group structure?
-        - Creating, editing, organizing, archiving, or duplicating groups → groups
-        - Group type settings, defaults, or configuration → groups
-        - Member roles, enrollment strategies, member limits, confidential lists → groups
-        - Tags, children groups, bulk group operations → groups
+        1. Ask: Does this FR mention any Groups domain terms?
+        - Groups, small groups, life groups, community groups, Sunday School classes, recovery groups, group types, tags, children groups, sub-groups, confidential groups, membership, enrollment, open signup, request-based enrollment, member limits, group leaders, facilitators, hosts, group coordinators, seasons, RSVP, group events, group attendance, resources, curriculum, study materials, shared resources, group automations, auto-actions, Church Center group discovery, group directory, map view, group signup → groups
+        - Chat messages, direct messaging, message threading, message notifications → not_groups (Chat product)
+        - Member profiles, contact info, custom fields, household data, People lists → not_groups (People product)
+        - Facility booking, room scheduling, resource reservation → not_groups (Calendar product)
+        - Kiosk check-in, label printing, security codes, child check-in → not_groups (Check-Ins product)
 
-        2. Ask: Is this about group events, attendance, resources, or seasons?
-        - Event scheduling within groups, RSVP tracking, attendance tracking → groups
-        - Seasons (launching, archiving, duplicating seasonal group cycles) → groups
-        - Sharing resources, files, curriculum, or study materials within groups → groups
+        2. Ask: Where would this change be implemented?
+        - Groups admin app, Church Center group directory, group type settings, group event configuration, group reports, group automation settings, group enrollment settings, group resource management → lean groups
+        - Another product's UI, settings, workflows, or data model → lean not_groups
 
-        3. Ask: Is this about group reporting, automations, or leader tools?
-        - Group stats, attendance reports, demographics, drop-off rates → groups
-        - Automated actions triggered by group membership changes → groups
-        - Leader-specific tools for managing their groups → groups
+        3. Ask: Is this about how a GROUP is managed, or about a person's PROFILE?
+        - Group membership, group roles, enrollment rules, member limits, confidential member lists, group leader permissions, group-specific member data → groups (even if "people" or "member" language is used)
+        - Contact info changes, household relationships, custom fields on profiles, member directories, People lists for non-group purposes → not_groups (People product)
 
-        4. Ask: Could this be solved by a new or improved Groups feature?
-        - Yes → groups
-        - No → not_groups or uncertain
+        4. Ask: Is the request about the group management experience or about a platform/infrastructure concern?
+        - Group creation, group type configuration, season management, enrollment workflows, attendance tracking, resource sharing, group reporting, group automations → groups
+        - Church Center platform features, Publishing settings, account/org billing, messaging infrastructure → not_groups or uncertain
 
         Hard rules:
-        1. If the request is about group messaging, chat within groups, or direct messaging between group members, verdict must be "not_groups" -- the Chat team owns messaging infrastructure. Groups only owns the group management context, not the messaging system itself.
-        2. If the request is about member profiles, custom fields on people records, merging profiles, or the People database, verdict must be "not_groups" -- the People team owns profiles and custom fields. Groups owns group membership but not the underlying person record.
-        3. If the request is about facility booking, room scheduling, or resource reservation for physical spaces, verdict must be "not_groups" -- the Calendar team owns room/resource scheduling. Groups owns group events but not facility management.
-        4. If the request is about kiosk-based check-in, self-check-in stations, or label printing for check-in, verdict must be "not_groups" -- the Check-Ins team owns kiosk check-in workflows. Groups owns group attendance tracking but not kiosk infrastructure.
-        5. If the request could plausibly be implemented either in Groups or another product and does not explicitly mention group types, group membership, group events, group attendance, group resources, or seasons, verdict must be "uncertain".
-        6. If the request is about how groups appear or are discovered on Church Center (browsing, filtering, map view, signup flow), it belongs to Groups as long as it concerns group-specific functionality. If the request is about Church Center's general UI, navigation, or platform-level features unrelated to groups, verdict must be "not_groups".
+        1. If the request mentions groups, small groups, group types, membership, enrollment, seasons, group events, group attendance, resources, curriculum, tags, children groups, confidential groups, group leaders, group automations, RSVP, or Church Center group discovery/signup in the context of community/group management, verdict must be "groups" even if people/calendar/check-in terminology is also used.
+        2. If the request is about group membership records, group member roles, enrollment strategies, member limits, confidential member lists, group leader permissions, or group-specific member views, verdict must be "groups" -- these are Groups-owned concepts, not People concepts.
+        3. If the request is about the MESSAGING SYSTEM itself (chat UI, direct messages, message threading, message delivery, message notifications), verdict must be "not_groups" -- the Chat team owns messaging infrastructure. Groups owns group communication settings but not the messaging system.
+        4. If the request is about managing a person's CONTACT INFORMATION, HOUSEHOLD RELATIONSHIPS, CUSTOM FIELDS, DEMOGRAPHIC DATA, or building PEOPLE LISTS for non-group purposes, verdict must be "not_groups" -- People owns profile data; Groups owns group membership.
+        5. If the request is about FACILITY BOOKING, room scheduling, or resource reservation for physical spaces, verdict must be "not_groups" -- Calendar owns room/resource scheduling. Groups owns group events but not facility management.
+        6. If the request is about KIOSK-BASED CHECK-IN, self-check-in stations, label printing, or child safety check-in workflows, verdict must be "not_groups" -- Check-Ins owns kiosk check-in. Groups owns group attendance tracking but not kiosk infrastructure.
+        7. If the request is about how groups appear or are discovered on Church Center (browsing, filtering, map view, signup flow, group directory), it belongs to Groups as long as it concerns group-specific functionality. If the request is about Church Center's general UI, navigation, or platform-level features unrelated to groups, verdict must be "not_groups".
+        8. If the request could plausibly be implemented either in Groups or another product and does not mention any Groups domain terms (groups, small groups, group types, membership, enrollment, seasons, group events, group attendance, resources, curriculum, tags, automations, RSVP, group leaders), verdict must be "uncertain".
 
         Output rules:
         - Use only the product context and feature request content provided.

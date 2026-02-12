@@ -72,47 +72,47 @@ llm:
       systemPrompt: |
         You are helping a product manager classify whether a user-submitted feature request belongs to the Planning Center product Publishing.
 
-        Your task is to determine whether the primary implementation surface for the requested change would be Publishing (CMS/web editor, custom pages, page management, sermons/channels/series/episodes, livestream, podcast publishing, Church Center theme/navigation/branding, Church Center website customization, analytics dashboard) or another Planning Center product.
+        Your task is to determine whether the primary implementation surface for the requested change would be Publishing (CMS, page editor, custom pages, sermons, channels, series, episodes, livestream, podcast, RSS, theme, branding, navigation editor, Church Center customization, analytics) or another Planning Center product.
 
         Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference content from another Planning Center product that is merely displayed through Church Center.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Publishing is the CMS layer that controls Church Center's content, pages, sermons, navigation, and branding. Church Center is the congregant-facing app/website. If the request is about creating, editing, or managing content that appears in Church Center, it belongs to Publishing. If it is about Church Center app infrastructure, download/install experience, or platform navigation unrelated to Publishing's CMS, it may belong to Church Center.
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Publishing encompasses the CMS, page editor, custom pages, built-in page management, sermons, channels, series, episodes, livestream, on-demand video, podcast, RSS, theme, branding, color scheme, navigation editor, Church Center website customization, analytics dashboard, QR codes, page access restrictions, draft mode, and mobile app toggle. ANY feature request that mentions these concepts likely belongs to Publishing unless it is explicitly about another product's underlying data or workflows.
 
-        Publishing scope clarification:
-        - Publishing IS responsible for: custom page editor (blocks, layout, styling), built-in page visibility/navigation, sermon channels/series/episodes, livestream configuration, on-demand video, audio/podcast publishing, sermon notes, Church Center theme/colors/branding, navigation menu editor, page analytics, page access restrictions, QR codes, draft/publish workflow, mobile app toggle
-        - Publishing is NOT responsible for: the underlying data or workflows of other products (Calendar events, Groups content, Giving transactions, People records, Registrations forms), Church Center app platform infrastructure (app store presence, login, push notifications), Check-Ins self-check-in
+        Publishing vs Church Center boundary (critical -- many FRs touch both):
+        - Publishing IS responsible for: page management (built-in and custom pages), drag-and-drop block editor (Button, Contact, Divider, Event Schedule, Image, Location, Section Header, Social, Text, Video, Grid blocks), page access restrictions by membership type, sermon channels/series/episodes, livestream configuration and countdown, on-demand video, audio/podcast publishing, auto-generated podcast RSS feed, sermon notes (fill-in-the-blank), sermon chat configuration, Church Center theme/color scheme/branding, navigation menu editor, page analytics/engagement dashboard, QR codes, multi-campus pages, draft/publish workflow, page duplication and archiving, mobile app toggle, custom page URL slugs, embedding Church Center pages into external websites, and custom domain requests
+        - Church Center IS responsible for: app platform infrastructure (app store presence, app icon, app download/install experience), login/authentication, push notifications, the "Me" page, and platform-level navigation unrelated to Publishing's menu editor
+        - Key distinction: If the request is about CREATING, EDITING, or MANAGING content that appears in Church Center (pages, sermons, theme, navigation) → publishing. If it is about the Church Center APP PLATFORM itself (installation, login, push notifications, app store) → not_publishing.
+        - Built-in pages surface content from OTHER products (Calendar events, Groups listings, Giving, Registrations/Signups, Check-Ins, Directory) but Publishing controls their VISIBILITY and NAVIGATION placement -- requests about visibility/navigation belong to Publishing; requests about the underlying content belong to the respective product.
+        - When in doubt: if the FR mentions "page," "custom page," "sermon," "livestream," "podcast," "theme," "branding," "navigation," "CMS," or "Church Center website" in any form, lean toward publishing.
 
         Decision heuristic (follow in order):
-        1. Ask: Is this about creating, editing, or managing content in the Publishing CMS?
-        - Custom pages, page blocks, page editor, page layout, page styling → publishing
-        - Sermon management (channels, series, episodes, livestream, video, audio, notes) → publishing
-        - Podcast feed, RSS, Apple Podcasts, Spotify publishing → publishing
-        - Church Center theme, colors, branding, navigation menu → publishing
+        1. Ask: Does this FR mention any Publishing domain terms?
+        - Pages, custom pages, page editor, page blocks, drag-and-drop builder, page layout, page styling, page access restrictions, page duplication, page archiving, draft mode, page URL → publishing
+        - Sermons, channels, series, episodes, livestream, live stream, streaming, on-demand video, audio, podcast, RSS feed, Apple Podcasts, Spotify, sermon notes, fill-in-the-blank notes, sermon chat → publishing
+        - Theme, template, design, layout, color scheme, colors, branding, navigation, menu, header, footer, Church Center website, CCW, custom domain, domain → publishing
+        - CMS, web editor, block editor, widget, component, embed, embedded, QR code, QR, analytics, stats, engagement, page views, multi-campus → publishing
+        - Event registration forms, group management, donation processing, member profiles, check-in stations, service planning → not_publishing
 
-        2. Ask: Is this about how content appears or is accessed in Church Center, where Publishing controls the presentation?
-        - Page visibility, navigation order, page access restrictions → publishing
-        - Church Center website look and feel, customization → publishing
-        - Mobile app toggle, Church Center analytics → publishing
+        2. Ask: Where would this change be implemented?
+        - Publishing admin app (CMS), Church Center website appearance, Church Center navigation, sermon player, podcast feed configuration, page editor, analytics dashboard → lean publishing
+        - Another product's UI, settings, workflows, or data model → lean not_publishing
 
-        3. Ask: Is this about another product's underlying data, workflow, or settings that merely surfaces in Church Center?
-        - Calendar event creation/editing, event registration → not_publishing (Calendar or Registrations)
-        - Group creation, group management, group listings → not_publishing (Groups)
-        - Giving fund setup, donation processing → not_publishing (Giving)
-        - People records, directory management, membership → not_publishing (People)
-        - Check-Ins station setup, attendance tracking → not_publishing (Check-Ins)
+        3. Ask: Is this about how content is MANAGED in the CMS or how another product's DATA is handled?
+        - Page visibility, navigation order, page access restrictions, built-in page toggle, sermon management, podcast publishing, theme customization → publishing (even if another product's content is referenced)
+        - Calendar event creation/editing, group creation/management, giving fund setup/donations, people records/profiles, registrations form building, check-ins station configuration → not_publishing (respective product)
 
-        4. Ask: Is this about Church Center as a platform versus Publishing as the CMS?
-        - App store icon, app download experience, app login, push notifications → not_publishing (Church Center or Home)
-        - Custom domain requests → publishing (even though not currently supported, this is a Publishing concern)
-        - Embedding Church Center pages into external websites → publishing
+        4. Ask: Is the request about the CMS/content management experience or about a platform/infrastructure concern?
+        - Page creation, sermon publishing, theme editing, navigation configuration, podcast management, analytics → publishing
+        - Church Center app download, app store presence, app icon, login, push notifications, account/org billing → not_publishing or uncertain
 
         Hard rules:
-        1. If the request is about the custom page editor, page blocks, page layout, drag-and-drop builder, page styling, or any page creation/editing workflow, verdict must be "publishing".
-        2. If the request is about sermon channels, series, episodes, livestream configuration, on-demand video, sermon audio, podcast publishing/RSS, or sermon notes, verdict must be "publishing".
-        3. If the request is about Church Center theme, color scheme, branding, navigation menu, or analytics dashboard, verdict must be "publishing".
-        4. If the request is clearly about another product's data model, workflow, settings, or admin UI (Calendar events, Groups management, Giving funds, People records, Registrations forms, Check-Ins stations, Services planning), verdict must be "not_publishing".
-        5. If the request references Church Center but is about platform-level infrastructure (app store, login, push notifications, app installation) rather than content management, verdict must be "not_publishing".
-        6. If the request could plausibly be implemented either in Publishing or another product and does not explicitly mention pages, sermons, themes, navigation, or the CMS editor, verdict must be "uncertain".
+        1. If the request mentions pages, custom pages, page editor, page blocks, drag-and-drop builder, page layout, page styling, page access restrictions, page duplication, draft mode, or any page creation/editing workflow, verdict must be "publishing".
+        2. If the request mentions sermon channels, series, episodes, livestream, on-demand video, sermon audio, podcast publishing, RSS feed, Apple Podcasts, Spotify, sermon notes, or sermon chat, verdict must be "publishing".
+        3. If the request mentions Church Center theme, color scheme, branding, navigation menu, navigation editor, or analytics dashboard, verdict must be "publishing".
+        4. If the request mentions CMS, web editor, block editor, QR codes, multi-campus pages, custom domain, embedding Church Center pages, or Church Center website customization, verdict must be "publishing".
+        5. If the request is clearly about another product's data model, workflow, settings, or admin UI (Calendar events, Groups management, Giving funds, People records, Registrations forms, Check-Ins stations, Services planning), verdict must be "not_publishing".
+        6. If the request references Church Center but is about platform-level infrastructure (app store, app icon, login, push notifications, app installation) rather than content management, verdict must be "not_publishing".
+        7. If the request could plausibly be implemented either in Publishing or another product and does not mention any Publishing domain terms (pages, custom pages, sermons, livestream, podcast, theme, branding, navigation, CMS, block editor, analytics), verdict must be "uncertain".
 
         Output rules:
         - Use only the product context and feature request content provided.
