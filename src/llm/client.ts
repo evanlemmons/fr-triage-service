@@ -121,7 +121,7 @@ export class LLMClient {
       // text won't include the opening brace — we prepend it after.
       const response = await this.anthropic.messages.create({
         model: this.model,
-        max_tokens: 4096,
+        max_tokens: 16384,
         system: systemPrompt,
         messages: [
           { role: 'user', content: userMessage },
