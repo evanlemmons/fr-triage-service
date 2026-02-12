@@ -63,8 +63,26 @@ export class LLMClient {
       });
     }
 
-    // Parse and validate the response
-    const parsed = this.parseJSON(rawText, schemaName);
+    // Parse JSON (with retry on parse failure)
+    let parsed: unknown;
+    try {
+      parsed = this.parseJSON(rawText, schemaName);
+    } catch (parseErr) {
+      // Log what the LLM actually returned so we can debug
+      this.logger.warn(`JSON parse failed for ${schemaName}, retrying`, {
+        responsePreview: rawText.slice(0, 300),
+      });
+
+      try {
+        const retryMessage = `${userMessage}\n\nCRITICAL: Your previous response was not valid JSON. You MUST return ONLY a raw JSON object. No explanation, no markdown, no code fences. Return the JSON object directly.`;
+        const retryText = await this.getRawCompletion(systemPrompt, retryMessage);
+        parsed = this.parseJSON(retryText, schemaName);
+      } catch (retryErr) {
+        throw parseErr; // Throw original error if retry also fails
+      }
+    }
+
+    // Validate against schema
     const result = responseSchema.safeParse(parsed);
 
     if (result.success) {
@@ -141,10 +159,10 @@ export class LLMClient {
     try {
       return JSON.parse(jsonStr);
     } catch {
-      throw new LLMError(`Failed to parse LLM response as JSON for ${context}`, {
-        context,
-        responsePreview: jsonStr.slice(0, 200),
-      });
+      throw new LLMError(
+        `Failed to parse LLM response as JSON for ${context}: ${jsonStr.slice(0, 200)}`,
+        { context, responsePreview: jsonStr.slice(0, 500) },
+      );
     }
   }
 }
