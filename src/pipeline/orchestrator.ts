@@ -15,7 +15,12 @@ export async function runTriage(
   config: PipelineConfig,
   logger: Logger,
 ): Promise<TriageResult> {
-  const { product, dryRun } = config;
+  const { product, dryRun, writeAudit } = config;
+
+  // CRITICAL SAFETY: Never modify FR relation properties during write-audit mode.
+  // Write-audit should ONLY create audit pages and send Slack notifications.
+  // This flag gates ALL FR property writes (Product Pulse, Ideas Database relations).
+  const skipFRUpdates = dryRun || writeAudit;
 
   // Initialize clients
   const notionApiKey = process.env.NOTION_API_KEY;
@@ -81,7 +86,7 @@ export async function runTriage(
         notionClient,
         llmClient,
         logger,
-        dryRun, // skipFRUpdates: true when dry-run (even with writeAudit)
+        skipFRUpdates, // NEVER modify FR properties during dry-run OR write-audit
       );
       results.push(result);
     } catch (err) {
