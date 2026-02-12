@@ -204,7 +204,7 @@ async function matchPulses(
     logger.warn(`  Filtered ${invalid.length} invalid pulse IDs from LLM response`);
   }
 
-  // Build validated matches
+  // Build validated matches, sorted by confidence, limited to top 2
   const validMatches: ValidatedMatch[] = valid.map((id) => {
     const original = aboveThreshold.find(
       (m) => m.pulse_id.replace(/-/g, '').toLowerCase() === id.replace(/-/g, '').toLowerCase(),
@@ -214,7 +214,7 @@ async function matchPulses(
       confidence: original?.confidence ?? 0,
       reason: original?.reason ?? '',
     };
-  });
+  }).sort((a, b) => b.confidence - a.confidence).slice(0, 2);
 
   if (validMatches.length > 0) {
     // Write audit entries for each match
@@ -373,7 +373,7 @@ async function matchIdeas(
     logger.warn(`  Filtered ${invalid.length} invalid idea IDs from LLM response`);
   }
 
-  // Build validated matches
+  // Build validated matches, sorted by confidence, limited to top 2
   const validMatches: ValidatedMatch[] = valid.map((id) => {
     const original = aboveThreshold.find(
       (m) => m.idea_page_id.replace(/-/g, '').toLowerCase() === id.replace(/-/g, '').toLowerCase(),
@@ -383,7 +383,7 @@ async function matchIdeas(
       confidence: original?.confidence ?? 0,
       reason: original?.reasoning ?? '',
     };
-  });
+  }).sort((a, b) => b.confidence - a.confidence).slice(0, 2);
 
   if (validMatches.length > 0) {
     // Write audit entries for each match
