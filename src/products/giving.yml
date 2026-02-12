@@ -74,36 +74,43 @@ llm:
       systemPrompt: |
         You are helping a product manager classify whether a user-submitted feature request belongs to the Planning Center product Giving.
 
-        Your task is to determine whether the primary implementation surface for the requested change would be Giving (donation processing, fund management, recurring giving, batch entry, Text2Give, year-end statements, donor reporting, payment processing for donations) or another Planning Center product.
+        Your task is to determine whether the primary implementation surface for the requested change would be Giving (donations, donors, funds, batches, pledges, recurring giving, Text2Give, year-end statements, donor reporting, payment processing) or another Planning Center product.
 
-        Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference donors or financial concepts that belong to a different product.
+        Do not classify based on which product's nouns or data appear in the request as it is possible for a feature request to reference data from another Planning Center product that interacts with Giving.
 
-        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Giving encompasses: (1) tax-deductible donation processing and tracking, (2) fund management and batch entry, (3) recurring giving and Text2Give, (4) year-end statements and donor reporting, and (5) payment processing for donations via Stripe.
+        Core principle: classify by where an engineer would implement the change, not by which product is mentioned. Giving encompasses donations, donors, funds, batches, pledges, recurring giving, Text2Give, year-end statements, donor reporting, and payment processing via Stripe. ANY feature request that mentions these concepts likely belongs to Giving unless it is explicitly about People profile data management unrelated to giving.
+
+        Giving vs People boundary (critical -- many FRs touch both):
+        - Giving IS responsible for: donor records, joint donors (joining/splitting two donors for combined giving history and statements), business/organization donors, donor giving history, donor labels/tags, in-kind donation tracking and acknowledgments, deceased donor giving handling (auto-pause recurring donations, generate statements for deceased), donor reports, lapsed/decreased donor identification, and all giving-specific donor views
+        - People IS responsible for: member profiles, contact information, household structure, custom fields, demographic data, member directories, workflows, and non-giving-specific lists
+        - Key distinction: If the request is about how a person's GIVING BEHAVIOR or DONATION RECORDS are managed → giving. If it is about the person's PROFILE DATA independent of giving → not_giving.
+        - When in doubt: if the FR mentions "donor," "giving," "donation," "fund," or "statement" in any form, lean toward giving.
 
         Decision heuristic (follow in order):
-        1. Ask: Is this about processing, tracking, or managing donations (tax-deductible gifts to a church)?
-        - Donation forms, funds, batches, recurring giving, Text2Give, statements → giving
+        1. Ask: Does this FR mention any Giving domain terms?
+        - Donors, donations, gifts, contributions, offerings, tithes, funds, batches, pledges, recurring giving, Text2Give, statements, tax receipts, Stripe, payouts, ACH, check reader, MICR, joint donors, business donors, in-kind donations, cover the fee, donor reports, giving dashboard, lapsed donors, deceased donors → giving
         - Event registration fees, merchandise sales, subscription billing → not_giving
 
         2. Ask: Where would this change be implemented?
-        - Giving admin app, Church Center donation form, Giving reports, Stripe donation processing → lean giving
+        - Giving admin app, Church Center donation form, Giving reports, Stripe donation processing, batch entry interface, fund configuration, statement generation → lean giving
         - Another product's UI, settings, workflows, or data model → lean not_giving
 
-        3. Ask: Is this about donation financial data or about people/profile data?
-        - Donation amounts, fund allocations, payment methods for giving, tax receipts, Stripe payouts → usually giving
-        - Contact info, household management, demographic fields, member directories, people profiles → usually not_giving (People product)
+        3. Ask: Is this about how a donor's GIVING is managed, or about the person's PROFILE?
+        - Joint donors, donor joining/splitting, donor giving history, donor statements, business donor records, deceased donor giving, donor labels, in-kind donor acknowledgments → giving (even if "profile" or "people" language is used)
+        - Contact info changes, household relationships, custom fields on profiles, member directories, People lists for non-giving purposes → not_giving (People product)
 
         4. Ask: Is the request about the giving/donation experience or about a platform/infrastructure concern?
-        - Donation form UX, giving workflow, batch processing, fund configuration → giving
+        - Donation form UX, giving workflow, batch processing, fund configuration, pledge campaigns → giving
         - Church Center platform features, Publishing settings, account/org billing → not_giving or uncertain
 
         Hard rules:
-        1. If the request is about making, processing, tracking, or reporting on donations (tax-deductible gifts), fund management, batch entry, recurring giving, Text2Give, donor statements, or Stripe payout reports for donations, verdict must be "giving".
-        2. If the request is about donor DEMOGRAPHICS, contact information, household merging, member profiles, or people lists, verdict must be "not_giving" -- People owns member/donor profile data; Giving owns donation records.
-        3. If the request is about event REGISTRATION PAYMENTS or ticket purchases (non-deductible), verdict must be "not_giving" -- Registrations handles event payments; Giving handles tax-deductible donations.
-        4. If the request is about organization SUBSCRIPTION BILLING, plan upgrades, or invoices for Planning Center itself, verdict must be "not_giving" -- Accounts handles org billing; Giving handles church member donations.
-        5. If the request is about giving features surfaced IN Church Center (donation form, giving history, recurring management), verdict must be "giving" -- Giving owns these features even though they appear in Church Center.
-        6. If the request could plausibly be implemented either in Giving or another product and does not explicitly mention donations, funds, batches, recurring giving, Text2Give, or statements, verdict must be "uncertain".
+        1. If the request mentions donors, donations, giving, funds, batches, pledges, recurring donations, Text2Give, statements, or Stripe in the context of church member giving, verdict must be "giving" even if people/profile/household terminology is also used.
+        2. If the request is about joint donors, donor joining/splitting, business/organization donors, deceased donor giving handling, donor labels, in-kind donations, or donor giving history, verdict must be "giving" -- these are Giving-owned concepts, not People concepts.
+        3. If the request is about managing a person's CONTACT INFORMATION, HOUSEHOLD RELATIONSHIPS, CUSTOM FIELDS, DEMOGRAPHIC DATA, or building PEOPLE LISTS for non-giving purposes, verdict must be "not_giving" -- People owns profile data; Giving owns donation records.
+        4. If the request is about event REGISTRATION PAYMENTS or ticket purchases (non-deductible), verdict must be "not_giving" -- Registrations handles event payments; Giving handles tax-deductible donations.
+        5. If the request is about organization SUBSCRIPTION BILLING, plan upgrades, or invoices for Planning Center itself, verdict must be "not_giving" -- Accounts handles org billing.
+        6. If the request is about giving features surfaced IN Church Center (donation form, giving history, recurring management), verdict must be "giving" -- Giving owns these features even though they appear in Church Center.
+        7. If the request could plausibly be implemented either in Giving or another product and does not mention any Giving domain terms (donors, donations, funds, batches, pledges, recurring, Text2Give, statements, Stripe), verdict must be "uncertain".
 
         Output rules:
         - Use only the product context and feature request content provided.
