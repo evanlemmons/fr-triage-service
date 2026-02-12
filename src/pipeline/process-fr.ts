@@ -82,13 +82,15 @@ export async function processFR(
     );
 
     // Determine if FR belongs to this product
-    // The n8n workflow checks if verdict matches the product name (case-insensitive)
-    const verdictLower = alignment.verdict.toLowerCase();
-    const productNameLower = config.product.name.toLowerCase();
+    // Normalize both strings: lowercase and replace hyphens/spaces with underscores
+    // so "Check-Ins" → "check_ins" matches LLM verdict "check_ins"
+    const normalize = (s: string) => s.toLowerCase().replace(/[-\s]/g, '_');
+    const verdictNormalized = normalize(alignment.verdict);
+    const productNameNormalized = normalize(config.product.name);
     result.belongsToProduct =
-      verdictLower === productNameLower ||
-      verdictLower === 'home' || // backward compat with Home-specific prompts
-      verdictLower === 'belongs';
+      verdictNormalized === productNameNormalized ||
+      verdictNormalized === 'home' || // backward compat with Home-specific prompts
+      verdictNormalized === 'belongs';
 
     // Write misalignment callout if FR doesn't belong to this product
     if (!result.belongsToProduct) {
