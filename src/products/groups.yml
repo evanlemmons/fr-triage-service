@@ -5,7 +5,7 @@ product:
   # enabled: Controls whether this product config can be loaded by the service
   # Set to false to temporarily disable FR triage for this product (useful when
   # refining prompts or testing). The service will refuse to load disabled products.
-  enabled: false
+  enabled: true
 
 productInfo:
   pageId: "522eec2a-28e3-4795-a825-3e9aa4c0976b"

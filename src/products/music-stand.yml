@@ -5,7 +5,7 @@ product:
   # enabled: Controls whether this product config can be loaded by the service
   # Currently DISABLED while product manager reviews prompts and validates configurations.
   # Change to true when ready for production use.
-  enabled: false
+  enabled: true
 
 productInfo:
   pageId: "f6aad617-d28a-46c1-8ac1-9aa0d23171f7"  # Music Stand product page

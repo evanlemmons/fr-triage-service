@@ -5,7 +5,7 @@ product:
   # enabled: Controls whether this product config can be loaded by the service
   # Currently DISABLED while product manager reviews prompts and validates configurations.
   # Change to true when ready for production use.
-  enabled: false
+  enabled: true
 
 productInfo:
   pageId: "2dfabbce-69a2-8011-81f0-d3b0b63c6a6c"  # Services Mobile product page
