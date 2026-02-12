@@ -10,13 +10,10 @@ on:
   workflow_dispatch:
     inputs:
       product:
-        description: 'Product to triage'
+        description: 'Product to triage (use YAML filename without .yml, or "all")'
         required: true
-        default: 'home'
-        type: choice
-        options:
-          - home
-          - all
+        default: 'all'
+        type: string
       dry_run:
         description: 'Dry run (log actions without writing to Notion)'
         required: false
