@@ -318,8 +318,9 @@ async function matchIdeas(
     return [];
   }
 
-  // Fetch full content for shortlisted ideas (capped at 1500 chars each)
-  const MAX_IDEA_CONTENT = 1500;
+  // Fetch full content for shortlisted ideas (capped at 4000 chars each).
+  // Only 10 candidates max, so 10 * 4000 = 40K chars is well within context.
+  const MAX_IDEA_CONTENT = 4000;
   const ideaCandidates: IdeaWithContent[] = [];
   for (const ideaId of validShortlistIds) {
     try {
