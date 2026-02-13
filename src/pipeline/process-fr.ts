@@ -318,11 +318,15 @@ async function matchIdeas(
     return [];
   }
 
-  // Fetch full content for shortlisted ideas
+  // Fetch full content for shortlisted ideas (capped at 1500 chars each)
+  const MAX_IDEA_CONTENT = 1500;
   const ideaCandidates: IdeaWithContent[] = [];
   for (const ideaId of validShortlistIds) {
     try {
-      const content = await getPageContent(notionClient, ideaId);
+      const rawContent = await getPageContent(notionClient, ideaId);
+      const content = rawContent.length > MAX_IDEA_CONTENT
+        ? rawContent.slice(0, MAX_IDEA_CONTENT) + '...'
+        : rawContent;
       const ideaTitle = prepResult.ideaTitles.find(
         (i) => i.id.replace(/-/g, '') === ideaId.replace(/-/g, ''),
       );

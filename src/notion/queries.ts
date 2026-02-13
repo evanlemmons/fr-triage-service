@@ -104,9 +104,16 @@ export async function queryPulseItems(
 
   const items: PulseItem[] = [];
 
+  // Cap content at 1500 chars per item to keep LLM context manageable.
+  // For matching purposes, the first ~1500 chars is sufficient signal.
+  const MAX_CONTENT_LENGTH = 1500;
+
   for (const page of results) {
     const title = extractTitle(page, 'Problem or Opportunity');
-    const content = await getPageContent(client, page.id);
+    const rawContent = await getPageContent(client, page.id);
+    const content = rawContent.length > MAX_CONTENT_LENGTH
+      ? rawContent.slice(0, MAX_CONTENT_LENGTH) + '...'
+      : rawContent;
     items.push({
       id: page.id,
       title,

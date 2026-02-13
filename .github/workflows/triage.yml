@@ -77,7 +77,7 @@ jobs:
   triage:
     needs: resolve-products
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240  # 4 hours for initial backlog; reduce after first full run
     strategy:
       matrix: ${{ fromJson(needs.resolve-products.outputs.matrix) }}
       fail-fast: false   # Don't cancel other products if one fails
