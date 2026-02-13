@@ -120,28 +120,62 @@ jobs:
           echo "Running: npx tsx src/index.ts $ARGS"
           npx tsx src/index.ts $ARGS
 
-      - name: Notify Slack on workflow failure
-        if: failure()
+      - name: Cleanup stuck audit pages and notify on failure
+        if: failure() || cancelled()
         env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         run: |
           npx tsx -e "
+          import { Client } from '@notionhq/client';
           import { WebClient } from '@slack/web-api';
           import { loadProductConfig } from './src/config/loader.js';
 
           const productName = '${{ matrix.product }}';
           const repoUrl = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
 
-          const config = await loadProductConfig(productName);
-          if (!config.notifications.slack.enabled) process.exit(0);
+          // Mark any 'In progress' audit pages as Error
+          try {
+            const notion = new Client({ auth: process.env.NOTION_API_KEY });
+            const config = await loadProductConfig(productName);
+            const auditDbId = config.audit.databaseId;
 
-          const target = config.notifications.slack.errorTarget ?? config.notifications.slack.summaryTarget;
-          const client = new WebClient(process.env.SLACK_BOT_TOKEN);
+            const response = await notion.databases.query({
+              database_id: auditDbId,
+              filter: {
+                property: 'Status',
+                status: { equals: 'In progress' },
+              },
+            });
 
-          const text = ':rotating_light: *FR Triage Workflow Failed*\n\nProduct: ' + productName + '\n\n<' + repoUrl + '|View GitHub Actions Run>';
+            for (const page of response.results) {
+              await notion.pages.update({
+                page_id: page.id,
+                properties: {
+                  'Status': { status: { name: 'Error' } },
+                  'Notes': {
+                    rich_text: [{ text: { content: 'Workflow timed out or was cancelled. See GitHub Actions run for details: ' + repoUrl } }],
+                  },
+                },
+              });
+              console.log('Marked audit page as Error:', page.id);
+            }
+          } catch (e) {
+            console.error('Failed to cleanup audit pages:', e);
+          }
 
-          await client.chat.postMessage({
-            channel: target.id,
-            text,
-          });
+          // Send Slack notification
+          try {
+            const config = await loadProductConfig(productName);
+            if (!config.notifications.slack.enabled) process.exit(0);
+
+            const target = config.notifications.slack.errorTarget ?? config.notifications.slack.summaryTarget;
+            const client = new WebClient(process.env.SLACK_BOT_TOKEN);
+
+            const text = ':rotating_light: *FR Triage Workflow Failed*\n\nProduct: ' + productName + '\n\n<' + repoUrl + '|View GitHub Actions Run>';
+
+            await client.chat.postMessage({
+              channel: target.id,
+              text,
+            });
           "

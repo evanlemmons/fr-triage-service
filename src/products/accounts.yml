@@ -120,6 +120,7 @@ llm:
         - Account settings, church name, logo, time zone, date format, language, localization, account cancellation, account deletion, delete account, close account, text messaging setup, org address, org phone, org email, org contact info → accounts
         - Product access, user access, product users, what products users have access to, permission levels per product → accounts
         - Security history, login history, login times, IP addresses, OAuth connections, permission change log → accounts
+        - Blocked emails, email blocking, blocked email addresses, email deliverability, email bounces → accounts
         - Multi-account, account linking, account switching, data portability, account merge → accounts
         - Donation, donor, fund, batch, pledge, recurring giving, Text2Give, statement → not_accounts (Giving)
         - Member profile, household, custom field, demographic, directory, workflow, People list → not_accounts (People)
