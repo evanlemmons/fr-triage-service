@@ -26,7 +26,7 @@ const ideasConfigSchema = z.object({
     statusNotEquals: z.array(z.string()).min(1),
   }),
   twoPhaseMatching: z.boolean().default(true),
-  shortlistMax: z.number().int().min(1).max(50).default(20),
+  shortlistMax: z.number().int().min(1).max(50).default(10),
   confidenceThreshold: z.number().min(0).max(1).default(0.80),
 });
 
