@@ -207,6 +207,7 @@ llm:
         - Under no circumstances may you ever generate or return an ID or title that does not exist in the provided Idea list.
         - For each candidate you return, include BOTH the id and the exact title copied from the provided list (verbatim).
         - Return only JSON matching the schema.
+        - The "why" field for each candidate must be 10 words or fewer — just the key matching signal.
         - notes should be brief and focus on why the shortlist was produced.
 
         Return only valid JSON matching this schema: {"candidate_ideas": [{"id": string, "title": string, "why": string}], "notes": string}

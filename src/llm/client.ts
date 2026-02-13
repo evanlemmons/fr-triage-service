@@ -129,6 +129,11 @@ export class LLMClient {
         ],
       });
 
+      // Warn if output was truncated due to max_tokens
+      if (response.stop_reason === 'max_tokens') {
+        this.logger.warn('LLM response was truncated (max_tokens reached). Output may be incomplete JSON.');
+      }
+
       const textBlock = response.content.find((b) => b.type === 'text');
       if (!textBlock || textBlock.type !== 'text') {
         throw new LLMError('No text block in Anthropic response');
