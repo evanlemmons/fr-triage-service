@@ -2,6 +2,19 @@ import { Client } from '@notionhq/client';
 import type { Logger } from '../utils/logger.js';
 
 const DEFAULT_DELAY_MS = 350;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
+/**
+ * Check if an error is a transient Notion API error worth retrying.
+ */
+function isTransientError(err: unknown): boolean {
+  if (err && typeof err === 'object' && 'status' in err) {
+    const status = (err as { status: number }).status;
+    return status === 502 || status === 503 || status === 504 || status === 429;
+  }
+  return false;
+}
 
 export interface NotionClientOptions {
   apiKey: string;
@@ -22,6 +35,26 @@ export class NotionClientWrapper {
     this.dryRun = options.dryRun ?? false;
     this.delayMs = options.delayMs ?? DEFAULT_DELAY_MS;
     this.logger = options.logger;
+  }
+
+  /**
+   * Retry a function on transient Notion API errors (502, 503, 504, 429).
+   */
+  private async withRetry<T>(fn: () => Promise<T>, context: string): Promise<T> {
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        return await fn();
+      } catch (err) {
+        if (isTransientError(err) && attempt < MAX_RETRIES) {
+          const delay = RETRY_DELAY_MS * attempt;
+          this.logger.warn(`Notion API transient error (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms`, { context });
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        } else {
+          throw err;
+        }
+      }
+    }
+    throw new Error(`Notion API failed after ${MAX_RETRIES} retries: ${context}`);
   }
 
   /**
@@ -99,7 +132,7 @@ export class NotionClientWrapper {
       return { id: 'dry-run-page-id', url: 'https://notion.so/dry-run' };
     }
     await this.throttle();
-    return this.client.pages.create(params);
+    return this.withRetry(() => this.client.pages.create(params), 'createPage');
   }
 
   /**
@@ -111,7 +144,7 @@ export class NotionClientWrapper {
       return {};
     }
     await this.throttle();
-    return this.client.pages.update(params);
+    return this.withRetry(() => this.client.pages.update(params), 'updatePage');
   }
 
   /**
@@ -129,9 +162,9 @@ export class NotionClientWrapper {
       return {};
     }
     await this.throttle();
-    return this.client.blocks.children.append({
+    return this.withRetry(() => this.client.blocks.children.append({
       block_id: blockId,
       children,
-    });
+    }), 'appendBlockChildren');
   }
 }
