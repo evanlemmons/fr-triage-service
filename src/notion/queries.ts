@@ -109,7 +109,7 @@ export async function queryPulseItems(
   const MAX_CONTENT_LENGTH = 2000;
 
   for (const page of results) {
-    const title = extractTitle(page, 'Problem or Opportunity').replace(/"/g, "'");
+    const title = extractTitle(page, 'Problem or Opportunity').replace(/"/g, '');
     const rawContent = await getPageContent(client, page.id);
     const content = rawContent.length > MAX_CONTENT_LENGTH
       ? rawContent.slice(0, MAX_CONTENT_LENGTH) + '...'
@@ -154,9 +154,11 @@ export async function queryIdeaTitles(
 
   return results.map((page: any) => ({
     id: page.id,
-    // Replace double quotes with single quotes in titles to prevent
-    // JSON escaping issues when the LLM echoes titles in its response.
-    title: extractTitle(page, 'Name').replace(/"/g, "'"),
+    // Strip double quotes from titles to prevent JSON escaping issues.
+    // The LLM echoes titles verbatim and unescaped quotes break JSON parsing.
+    // Stripping instead of replacing with single quotes because the LLM
+    // "corrects" single quotes back to double quotes.
+    title: extractTitle(page, 'Name').replace(/"/g, ''),
   }));
 }
 

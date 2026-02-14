@@ -170,6 +170,14 @@ export class LLMClient {
     try {
       return JSON.parse(jsonStr);
     } catch {
+      // Fallback: strip any curly/smart quotes and try again
+      try {
+        const cleaned = jsonStr.replace(/[\u201C\u201D\u201E\u201F\u2018\u2019]/g, "'");
+        return JSON.parse(cleaned);
+      } catch {
+        // Still broken
+      }
+
       throw new LLMError(
         `Failed to parse LLM response as JSON for ${context}: ${jsonStr.slice(0, 200)}`,
         { context, responsePreview: jsonStr.slice(0, 500) },
