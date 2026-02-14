@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
+import { jsonrepair } from 'jsonrepair';
 import type { z } from 'zod';
 import { LLMError } from '../utils/errors.js';
 import type { Logger } from '../utils/logger.js';
@@ -170,12 +171,13 @@ export class LLMClient {
     try {
       return JSON.parse(jsonStr);
     } catch {
-      // Fallback: strip any curly/smart quotes and try again
+      // Fallback: use jsonrepair to fix common LLM JSON issues
+      // (unescaped quotes in strings, trailing commas, etc.)
       try {
-        const cleaned = jsonStr.replace(/[\u201C\u201D\u201E\u201F\u2018\u2019]/g, "'");
-        return JSON.parse(cleaned);
+        const repaired = jsonrepair(jsonStr);
+        return JSON.parse(repaired);
       } catch {
-        // Still broken
+        // Repair failed too
       }
 
       throw new LLMError(
